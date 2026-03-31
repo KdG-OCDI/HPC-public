@@ -14,7 +14,7 @@ First step:
 To acces the TrinityX GUI setup a SOCKS v5 ssh tunnel:
 
 Linux/MacOS:
-- In a terminal run: `ssh -N -D 9090 tunneluser@compute.kdg.be`. Choose can choose a port at will instead of 9090, just something above 1024.
+- In a terminal run: `ssh -N -D 9090 tunneluser@compute.kdg.be`. You can choose a port at will instead of 9090, just something above 1024.
 - The password is `HPC-access-2026!`
 - The SSH-command **will block** but don't close the terminal (unless you get an error) as this will keep the SSH-tunnel open to reach the login page.
 - Open your webbrowser and under network settings set a manual proxy with `localhost` and port `9090` or use the **Foxy Proxy plugin** (see below, which is the better option)
