@@ -3,7 +3,7 @@ Documentation for the HPC cluster
 
 ## Network Access
 The cluster is reachable via the 'KdG' SSID. When on campus, simply connect to WiFi. <br/>
-_Note for researchers: it's not available on the NxT-Research wifi SSID. _
+*Note for researchers: it's not available on the NxT-Research wifi SSID.*
 
 If you are working remote follow the steps described here for (only available in Dutch :-() [remote access](https://studentkdg.sharepoint.com/sites/intranet-nl-ict/SitePages/GlobalProtect-(VPN).aspx)
 
