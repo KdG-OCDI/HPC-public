@@ -2,8 +2,11 @@
 Documentation for the HPC cluster
 
 ## Network Access
-The cluster is reachable via the 'KdG' SSID. On campus, simply connect over wifi. Note that it is not available on the NxT-Research wifi SSID. 
-If you are working remote follow the steps described here for [remote access](https://studentkdg.sharepoint.com/sites/intranet-medewerkers-nl/SitePages/Thuiswerken-via-VPN,-Citrix-of-Web-toepassingen.aspx?web=1)
+The cluster is reachable via the 'KdG' SSID. When on campus, simply connect to WiFi. 
+_Note for researchers: it's not available on the NxT-Research wifi SSID. _
+
+If you are working remote follow the steps described here for (only available in Dutch :-() [remote access](https://studentkdg.sharepoint.com/sites/intranet-nl-ict/SitePages/GlobalProtect-(VPN).aspx)
+
 First step:
 - Use the VPN solution or connect directly over wifi to the 'KdG' network.
 
@@ -14,7 +17,7 @@ Linux/MacOS:
 - In a terminal run: `ssh -N -D 9090 tunneluser@compute.kdg.be`. Choose can choose a port at will instead of 9090, just something above 1024.
 - The password is `HPC-access-2026!`
 - The SSH-command **will block** but don't close the terminal (unless you get an error) as this will keep the SSH-tunnel open to reach the login page.
-- Open your webbrowser and under network settings set a manual proxy with `localhost` and port `9090` or use the Foxy Proxy plugin (which is the better option)
+- Open your webbrowser and under network settings set a manual proxy with `localhost` and port `9090` or use the **Foxy Proxy plugin** (see below, which is the better option)
 Now all your webbrowser traffic will be directed over the SOCKS tunnel. Normal internet acces might not always work, but you can acces the cluster GUI. 
 - goto [https://controller1.cluster:8080](https://controller1.cluster:8080). You should see the login page of the TrinityX GUI.
 ![alt text](images/login_page.png)
