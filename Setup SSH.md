@@ -1,297 +1,230 @@
-# 🧑‍💻 SSH keys and VS Code Remote-SSH to access login node as `john`
+# SSH access by hand
 
-This guide explains how you as user `john` can log in to the **login node (compute.kdg.be)** of your HPC cluster via SSH **without entering your password every time**.
-We focus on both **WSL users** (Linux-like) and **Windows-native users** (PowerShell, Git Bash, VS Code).
+**Most people do not need this page.** The setup script in
+[README.md](README.md#2-first-time-setup--run-one-command) does everything
+below in about two minutes, and it is idempotent, so running it again is safe.
 
-You must always be connected to the school's **VPN** via GlobalProtect, unless you are on a campus as staff.
-Students must always use the **VPN**.
+Read on if you want to understand what it does, if you prefer to do it
+yourself, if you work from WSL or manage several keys, or if something went
+wrong and you want to check each step separately.
 
-### ⚠️ Note for Windows users:
-
-Some commands, such as `ssh-copy-id`, do **not work well** from PowerShell/CMD.
-Use WSL to perform the steps, and copy the result (e.g., the public key) manually to Windows if needed.
-
----
-
-## 🧠 What are we doing and why?
-
-SSH works with **public and private keys**:
-
-* The **private key** stays on your local computer (secured with a passphrase)
-* The **public key** goes on the login node (in `~/.ssh/authorized_keys`)
-* SSH checks whether your private key matches the public key and grants you access **without a password**
-
-To avoid entering your passphrase repeatedly, you use an **ssh-agent**, which temporarily "remembers" the key for you.
+Everything here assumes you are on the KdG network or connected to the
+**GlobalProtect VPN**.
 
 ---
 
-## 🔑 Step 1 – Generate an SSH key pair
+## How key-based login works
 
-> Only required if you don't have a key yet
+You create a pair of files that belong together:
 
-### ✅ In WSL (recommended)
+- The **private key** stays on your own machine and never leaves it. Anyone who
+  has it can log in as you, so it is protected by file permissions and,
+  optionally, a passphrase.
+- The **public key** goes on the login node, in `~/.ssh/authorized_keys`.
+  It is not secret.
+
+At login, the server challenges your client to prove it holds the private key.
+Nothing secret crosses the network, which is why this is both safer and more
+convenient than a password.
+
+To avoid typing your passphrase every time, an **ssh-agent** holds the unlocked
+key in memory for the rest of your session.
+
+---
+
+## Step 1 — Generate a key pair
+
+Only if you do not have one yet. Check first:
 
 ```bash
-ssh-keygen -t ed25519 -f ~/.ssh/john_id_ed25519 -C "john access to login node"
+ls ~/.ssh/id_ed25519.pub
 ```
 
-### ✅ In Windows (PowerShell or Git Bash)
+If that file does not exist:
+
+```bash
+ssh-keygen -t ed25519 -C "your.name@kdg.be"
+```
+
+Press Enter to accept the default location. A passphrase is optional; with an
+agent (step 4) you only type it once per session.
+
+This works the same in macOS Terminal, Linux, WSL, Git Bash and **PowerShell** —
+Windows 10 and 11 ship with OpenSSH. Older versions of this guide said
+otherwise; that has not been true for years.
+
+You now have two files:
+
+| File | What it is |
+|---|---|
+| `~/.ssh/id_ed25519` | private key — never share or copy it off your machine |
+| `~/.ssh/id_ed25519.pub` | public key — this is the one you upload |
+
+On Windows these live in `C:\Users\<you>\.ssh\`.
+
+---
+
+## Step 2 — Put your public key on the login node
+
+This is the only step that needs your password, and only once.
+
+### macOS, Linux, WSL, Git Bash
+
+```bash
+ssh-copy-id your_username@compute.kdg.be
+```
+
+### Windows PowerShell
+
+`ssh-copy-id` does not exist here. Do not pipe the file into `ssh`: PowerShell
+re-encodes piped text, which corrupts the key on arrival. Read it into a
+variable instead:
 
 ```powershell
-ssh-keygen -t ed25519 -f "$env:USERPROFILE\.ssh\john_id_ed25519" -C "john access to login node"
+$pub = (Get-Content -Raw "$env:USERPROFILE\.ssh\id_ed25519.pub").Trim()
+ssh your_username@compute.kdg.be "umask 077; mkdir -p ~/.ssh; touch ~/.ssh/authorized_keys; grep -qxF '$pub' ~/.ssh/authorized_keys || echo '$pub' >> ~/.ssh/authorized_keys"
 ```
 
-Result:
+The `grep -qxF ... ||` part is what makes this safe to repeat: without it, a
+second attempt appends a duplicate entry.
 
-* Private key: e.g. `~/.ssh/john_id_ed25519` or `C:\Users\<name>\.ssh\john_id_ed25519`
-* Public key: `.pub` file with the same name
+### Manually, on any platform
 
----
-
-## 📤 Step 2 – Add public key to the login node (`compute.kdg.be`)
-
-### ✅ Automatic (only possible in WSL)
+Show your public key, copy the whole line, then log in with your password and
+paste it as a new line in `~/.ssh/authorized_keys`:
 
 ```bash
-ssh-copy-id -i ~/.ssh/john_id_ed25519.pub john@compute.kdg.be
-```
-
-### 🔧 Add manually (all platforms)
-
-1. **Show your public key:**
-
-   **In WSL:**
-
-   ```bash
-   cat ~/.ssh/john_id_ed25519.pub
-   ```
-
-   **In Windows:**
-
-   ```powershell
-   Get-Content $env:USERPROFILE\.ssh\john_id_ed25519.pub
-   ```
-
-2. **Log in to the login node:**
-
-   ```bash
-   ssh john@compute.kdg.be
-   ```
-
-3. **Add the key:**
-
-   ```bash
-   mkdir -p ~/.ssh
-   chmod 700 ~/.ssh
-   nano ~/.ssh/authorized_keys
-   ```
-
-   Paste the public key at the end. Save: `Ctrl+O`, exit: `Ctrl+X`.
-
-   Then:
-
-   ```bash
-   chmod 600 ~/.ssh/authorized_keys
-   ```
-
----
-
-## ⚙️ Step 3 – Set up SSH configuration for convenience
-
-In `~/.ssh/config` (WSL) or `C:\Users\<name>\.ssh\config` (Windows):
-
-```ssh
-Host login
-  HostName compute.kdg.be
-  User john
-  IdentityFile ~/.ssh/john_id_ed25519  # WSL path or Windows path
-  IdentitiesOnly yes
-  ForwardAgent yes
-```
-
-Now use simply:
-
-```bash
-ssh login
+cat ~/.ssh/id_ed25519.pub                 # or: Get-Content on Windows
+ssh your_username@compute.kdg.be
+mkdir -p ~/.ssh && chmod 700 ~/.ssh
+nano ~/.ssh/authorized_keys               # paste, then Ctrl+O, Ctrl+X
+chmod 600 ~/.ssh/authorized_keys
 ```
 
 ---
 
-## 🧠 Step 4 – Use `ssh-agent` so you only enter your passphrase once
+## Step 3 — Give the connection a name
 
-### ✅ In WSL
+Add this to `~/.ssh/config` (`C:\Users\<you>\.ssh\config` on Windows):
+
+```ssh-config
+Host kdg-compute
+    HostName compute.kdg.be
+    User your_username
+    IdentityFile ~/.ssh/id_ed25519
+    IdentitiesOnly yes
+    AddKeysToAgent yes
+    ServerAliveInterval 60
+```
+
+On macOS, add `UseKeychain yes` to store the passphrase in the keychain.
+
+`IdentitiesOnly yes` matters more than it looks: without it, your client offers
+every key it knows about, and a server that allows only a few attempts may
+refuse you before it reaches the right one.
+
+You can now use `ssh kdg-compute` everywhere instead of the full address.
+
+---
+
+## Step 4 — Use an ssh-agent
+
+Only needed if your key has a passphrase.
+
+**macOS** — handled automatically by the `UseKeychain` line above.
+
+**Linux and WSL:**
 
 ```bash
 eval "$(ssh-agent -s)"
-ssh-add ~/.ssh/john_id_ed25519
+ssh-add ~/.ssh/id_ed25519
 ```
 
-> Add this to `~/.bashrc` or `~/.zshrc` for automatic use.
+Add those lines to `~/.bashrc` or `~/.zshrc` to make it permanent.
 
-### ✅ In Windows (PowerShell)
+**Windows PowerShell,** once, as administrator:
 
 ```powershell
+Set-Service ssh-agent -StartupType Automatic
 Start-Service ssh-agent
-ssh-add $env:USERPROFILE\.ssh\john_id_ed25519
 ```
 
-> Make sure you set the correct permissions:
+Then, as yourself:
 
 ```powershell
-icacls "$env:USERPROFILE\.ssh\john_id_ed25519" /inheritance:r /grant:r "$env:USERNAME:F"
+ssh-add $env:USERPROFILE\.ssh\id_ed25519
 ```
 
 ---
 
-## 💻 Step 5 – Use with **VS Code Remote-SSH**
-
-### 🔗 Install plugin:
-
-👉 [Remote - SSH for Visual Studio Code](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-ssh)
-
-### ✅ Configuration
-
-1. Make sure your `~/.ssh/config` (or `C:\Users\<name>\.ssh\config`) contains the correct `Host login` entry (see above)
-2. Open the Command Palette in VS Code:
-   `Ctrl+Shift+P` → **Remote-SSH: Connect to Host...**
-3. Choose `login`
-
----
-
-## 🧪 Testing
+## Step 5 — Test, and connect from your editor
 
 ```bash
-ssh login
+ssh kdg-compute
 ```
 
-✅ Success = immediate access without password
-🟡 Only passphrase if `ssh-agent` is not yet running
+You should land on the login node without typing a password. If you are asked
+for a passphrase, your agent is not running — the key itself is fine.
+
+- **VS Code / Cursor** — install
+  [Remote - SSH](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-ssh),
+  then `Ctrl+Shift+P` → *Remote-SSH: Connect to Host...* → `kdg-compute`
+- **PyCharm** — *Settings → Tools → SSH Configurations* → `kdg-compute`
+
+From there you open folders on the server and submit jobs with Slurm
+(`sbatch`, `srun`, `squeue`).
 
 ---
 
-## 📌 Summary
+## Several machines, several keys
 
-| Step                 | WSL                                  | Windows-native                        |
-| -------------------- | ------------------------------------ | ------------------------------------- |
-| Create key           | `ssh-keygen`                         | `ssh-keygen`                          |
-| Add public key       | `ssh-copy-id` or manually            | Manually                              |
-| SSH config           | `~/.ssh/config`                      | `C:\Users\<name>\.ssh\config`        |
-| Use ssh-agent        | `eval "$(ssh-agent -s)"` + `ssh-add` | `Start-Service ssh-agent` + `ssh-add` |
-| Use in VS Code       | Remote-WSL or Remote-SSH plugin      | Remote-SSH plugin                     |
+Generate a separate key on every machine you work from, and add each public key
+to the login node. Never copy a private key between machines: a key you cannot
+trace to one laptop is a key you cannot revoke when that laptop is lost.
 
----
-
-Let me know if you would like this as a `.md` file, PDF, or text file to add to your documentation — I'll prepare it for you right away.
-
-
-# SSH configuration for the HPC cluster
-
-**UPDATE: ⚠️ this is an earlier version of the step-by-step guide**
-
-Here is a brief step-by-step guide to set everything up again. This assumes you have already generated an SSH key pair and have already added the public key to the `authorized_keys` of the controller.
-
----
-
-### **Step 1: Generate SSH key pair**
-You can do this by running the following commands:
-```bash
-ssh-keygen -t ed25519 -C "description of the key" "
-```
-
-On Windows you can do this with Git Bash or Windows Subsystem for Linux (WSL). It does not work with the standard Windows Command Prompt or PowerShell. You can then find the public key in `~/.ssh/id_ed25519.pub`. It is possible to copy this to your Windows SSH directory, so you can also use this key in Windows PowerShell.
-
-Check if the key has been generated by running the following commands:
-```bash
-ls ~/.ssh
-cat ~/.ssh/id_ed25519.pub
-```
-
-Optional: copy the key from your WSL environment to your Windows environment:
+Give each one a name so you can tell them apart later:
 
 ```bash
-cp ~/.ssh/id_ed25519.pub /mnt/c/Users/your_username/.ssh/id_ed25519.pub
+ssh-keygen -t ed25519 -f ~/.ssh/id_ed25519_laptop -C "your.name@kdg.be laptop"
 ```
 
----
-
-### **Step 2: Copy public key to the controller node**
-1. **Use `ssh-copy-id` to add your public key to the `authorized_keys` on the controller node:**
-   ```bash
-   ssh-copy-id -i ~/.ssh/id_ed25519.pub root@datalab.kdg.be
-   ```
-2. **Test the connection to the controller:**
-   ```bash
-   ssh root@datalab.kdg.be
-   ```
-   You should now only need to enter your passphrase and have access.
+Then point `IdentityFile` at the right one in your `~/.ssh/config`.
 
 ---
 
-### **Step 3: Copy public key to `node008` via the controller**
-1. **Log in to the controller:**
-   ```bash
-   ssh root@datalab.kdg.be
-   ```
-2. **Copy your public key from the controller to `node008`:**
-   ```bash
-   ssh-copy-id -i ~/.ssh/id_ed25519.pub root@node008
-   ```
-3. **Test the connection from the controller to `node008`:**
-   ```bash
-   ssh root@node008
-   ```
-   You should now only need to enter your passphrase and have access.
+## When it does not work
+
+Run `ssh -v kdg-compute` — the verbose output shows which key was offered and
+what the server did with it.
+
+| Symptom | Cause |
+|---|---|
+| `Permission denied (publickey)` | The public key is not on the server, or it is in the wrong file. Repeat step 2. |
+| `WARNING: UNPROTECTED PRIVATE KEY FILE` | Your private key is readable by others. `chmod 600 ~/.ssh/id_ed25519`, or on Windows: `icacls "$env:USERPROFILE\.ssh\id_ed25519" /inheritance:r /grant:r "$($env:USERNAME):(R,W)"` |
+| Key ignored without any message | `sshd` refuses `~/.ssh` when its permissions are too broad. `chmod 700 ~/.ssh` and `chmod 600 ~/.ssh/authorized_keys`. |
+| Still asked for a passphrase | The agent is not running. See step 4. |
+| `Too many authentication failures` | Your client offered too many keys. Add `IdentitiesOnly yes`. |
+| Connection times out | VPN is not connected. |
+
+Keys can also be installed centrally in `/etc/ssh/authorized_keys.d/<user>`,
+which only administrators can write. If your own key works but a colleague's
+does not, that is worth asking the HPC team about.
 
 ---
 
-### **Step 3: Configure `ProxyJump` on your local laptop**
-1. **Open or create your SSH configuration file (`~/.ssh/config`) and add the following:**
+## Reaching a compute node directly
 
-   ```ssh
-   Host controller
-       HostName datalab.kdg.be
-       User root
-       IdentityFile ~/.ssh/id_ed25519
-       DynamicForward 9090
+Normal work does not need this: you submit jobs from the login node with Slurm
+and it places them on the nodes for you. For debugging a running job, you can
+hop through the login node:
 
-   Host node008
-       HostName node008
-       User root
-       ProxyJump controller
-       IdentityFile ~/.ssh/id_ed25519
-   ```
+```ssh-config
+Host node0*
+    HostName %h
+    User your_username
+    ProxyJump kdg-compute
+    IdentityFile ~/.ssh/id_ed25519
+```
 
-2. **Test the full connection via `ProxyJump`:**
-   ```bash
-   ssh -J root@datalab.kdg.be -i ~/.ssh/id_ed25519 root@node008
-   ```
-   You should now enter your passphrase twice: once for the controller and once for the compute node.
-
----
-
-### **Summary of Intermediate Testing**
-1. **To the controller (local → controller):**
-   ```bash
-   ssh root@datalab.kdg.be
-   ```
-   Expected: Enter passphrase once, access to the controller.
-
-2. **To the compute node via the controller (controller → node008):**
-   ```bash
-   ssh root@node008
-   ```
-   Expected: Enter passphrase once, access to `node008`.
-   Note: This was never necessary before, but this may have already been configured.
-
-3. **Full connection via `ProxyJump` (local → controller → node008):**
-   ```bash
-   ssh -J root@datalab.kdg.be -i ~/.ssh/id_ed25519 root@node008
-   ```
-   Expected: Enter passphrase twice, access to `node008`.
-
-
-Of course! Below you will find a clear, compact **summary in tutorial form**, following your existing documentation. I will build on your existing structure, with a focus on:
-
-* Use as **user `john`**
-* Key-based login via **login node (without ProxyJump)**
-* Add to `ssh-agent` to avoid entering your passphrase every time
+Then `ssh node001` connects through `compute.kdg.be` in one step. This works
+only for nodes where you already have a running job.
