@@ -1,7 +1,10 @@
 # Server-side: centrally managed SSH keys
 
-This directory holds the login-node side of the onboarding automation. It is a
-prerequisite for the planned self-service portal, but it is useful on its own.
+This directory holds the login-node side of the onboarding automation.
+
+Sections 1 to 4 are optional. They let a service install SSH keys on a user's
+behalf without writing into home directories, which is what a self-service key
+upload would need. Section 5 is the part in daily use.
 
 ## Why
 
@@ -93,18 +96,19 @@ journalctl -t hpc-set-authorized-key
 
 The previous file is kept as `<user>.bak` on each change.
 
-## 3. Sudo rule for the self-service portal
+## 3. Sudo rule for a key-upload service
 
-When the portal is built, it should run as its own unprivileged user with a
-single narrow sudo rule:
+A service that lets users install their own key — a page in the portal, or any
+other front end — should run as its own unprivileged user with a single narrow
+sudo rule:
 
 ```sudoers
 # /etc/sudoers.d/hpc-selfservice  (install with: visudo -f /etc/sudoers.d/hpc-selfservice)
 hpcselfservice ALL=(root) NOPASSWD: /usr/local/sbin/hpc-set-authorized-key
 ```
 
-The username argument is supplied by the portal and is therefore attacker-
-controlled if the portal is ever compromised. That is why the helper does its
+The username argument is supplied by that service and is therefore attacker-
+controlled if it is ever compromised. That is why the helper does its
 own validation rather than trusting its caller — the sudo rule restricts
 *which binary* may run, not what it is asked to do.
 
