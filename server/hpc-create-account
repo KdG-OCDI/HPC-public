@@ -48,7 +48,7 @@ audit() { logger -t hpc-create-account -p auth.notice -- "$*" || true; }
 USERNAME=""
 FULLNAME=""; OID=""; UPN=""; KEYFILE=""; EXTRA_GROUPS=""
 SHELL_PATH=/bin/bash; WANT_UID=""; WANT_GID=""
-DRYRUN=0; WITH_PASSWORD=0; MAKE_HOME=1
+DRYRUN=0; WITH_PASSWORD=0; MAKE_HOME=1; SKIP_ACL_CHECK=0
 
 while [ $# -gt 0 ]; do
   case "$1" in
@@ -62,6 +62,7 @@ while [ $# -gt 0 ]; do
     --gid)            WANT_GID="${2:-}"; shift 2 ;;
     --with-password)  WITH_PASSWORD=1; shift ;;
     --no-home)        MAKE_HOME=0; shift ;;
+    --skip-acl-check) SKIP_ACL_CHECK=1; shift ;;
     --dry-run)        DRYRUN=1; shift ;;
     -h|--help)        sed -n '3,25p' "$0" | cut -c3-; exit 0 ;;
     --*)              die "onbekende optie: $1" ;;
@@ -89,15 +90,42 @@ ldapsearch "${LDAP[@]}" -b "$BASE" -s base dn >/dev/null 2>&1 \
   || die "kan de directory niet lezen via ldapi:///. Draai je dit op de controller?"
 
 # Schrijfrecht vooraf controleren, zodat we geen half account achterlaten.
-# ldapmodify -n doet alles behalve daadwerkelijk schrijven.
-if ! ldapmodify "${LDAP[@]}" -n >/dev/null 2>&1 <<LDIFTEST
-dn: $PEOPLE
-changetype: modify
-replace: description
-description: schrijftest
-LDIFTEST
-then
-  die "geen schrijfrechten op de directory. Zie server/README.md, sectie 'Schrijfrechten'."
+# Let op: `ldapmodify -n` is hier nutteloos -- dat doet alsof en vraagt de
+# server niets, dus het slaagt ook zonder rechten. We kijken in plaats daarvan
+# of de ACL-regel voor lokale root bestaat.
+acl_uitleg() {
+  cat <<'UITLEG'
+Lokale root mag de directory wel lezen maar niet schrijven.
+
+Voeg op deze machine eenmalig deze regel toe:
+
+  slapcat -n0 -l /root/slapd-config-$(date +%F).ldif
+
+  cat <<'EOF' | ldapmodify -Y EXTERNAL -H ldapi:///
+  dn: olcDatabase={1}mdb,cn=config
+  changetype: modify
+  add: olcAccess
+  olcAccess: {0}to * by dn.exact="gidNumber=0+uidNumber=0,cn=peercred,cn=external,cn=auth" manage by * break
+  EOF
+
+Zie server/README.md, sectie "Write access", voor de uitleg en het
+terugdraaicommando. Weet je zeker dat het schrijfrecht anders geregeld is,
+gebruik dan --skip-acl-check.
+UITLEG
+}
+
+if [ "$SKIP_ACL_CHECK" -eq 0 ]; then
+  ACL_ID='gidNumber=0+uidNumber=0,cn=peercred,cn=external,cn=auth'
+  # LDIF vouwt lange regels af met een spatie; spaties en newlines weghalen
+  # maakt de vergelijking ongevoelig voor die opmaak. Vergelijken gebeurt met
+  # grep -F, want de identiteit bevat een '+' en dat is een quantifier in een
+  # reguliere expressie -- de match zou dan altijd mislukken.
+  acl_regels="$(ldapsearch "${LDAP[@]}" -LLL -b cn=config "(olcSuffix=$BASE)" olcAccess 2>/dev/null | tr -d '\n ')"
+  if ! printf '%s' "$acl_regels" | grep -qF "dn.exact=\"$ACL_ID\"manage" \
+     && ! printf '%s' "$acl_regels" | grep -qF "dn.exact=\"$ACL_ID\"write"; then
+    acl_uitleg >&2
+    die "geen schrijfrechten op de directory"
+  fi
 fi
 
 if [ -n "$KEYFILE" ] && [ ! -r "$KEYFILE" ]; then
@@ -197,7 +225,11 @@ fi
 
 # -------------------------------------------------------------------- aanmaken
 EXITCODE=1
-build_ldif | ldapadd "${LDAP[@]}" >/dev/null || die "ldapadd is mislukt"
+if ! addout="$(build_ldif | ldapadd "${LDAP[@]}" 2>&1)"; then
+  printf '%s\n' "$addout" >&2
+  printf '%s' "$addout" | grep -q 'Insufficient access' && acl_uitleg >&2
+  die "ldapadd is mislukt"
+fi
 ok "LDAP-entry aangemaakt"
 
 # Vanaf hier opruimen bij een fout: een half account is erger dan geen account.
