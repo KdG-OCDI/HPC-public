@@ -1,0 +1,6 @@
+# Shell scripts MOETEN LF-regeleindes hebben; met CRLF faalt de shebang
+# op macOS/Linux met "bad interpreter: /usr/bin/env bash^M".
+*.sh    text eol=lf
+*.ps1   text eol=crlf
+*.md    text
+images/* binary

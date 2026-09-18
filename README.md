@@ -1,62 +1,176 @@
-# HPC
-Documentation for the HPC cluster
+# KdG HPC Cluster
 
-## Network Access
-The cluster is reachable via the 'KdG' SSID. When on campus, simply connect to WiFi. <br/>
-*Note for researchers: it's not available on the NxT-Research wifi SSID.*
+Documentation for the KdG HPC cluster.
 
-If you are working remote follow the steps described here for (only available in Dutch :-() [remote access](https://studentkdg.sharepoint.com/sites/intranet-nl-ict/SitePages/GlobalProtect-(VPN).aspx)
+| | |
+|---|---|
+| **Login node (SSH)** | `compute.kdg.be` |
+| **Cluster GUI** | `https://controller1.cluster:8080` (TrinityX, via SOCKS tunnel) |
+| **Admin node** | `datalab.kdg.be` |
+| **Scheduler** | Slurm (`sbatch`, `srun`, `squeue`) |
 
-First step:
-- Use the VPN solution or connect directly over wifi to the 'KdG' network.
+---
 
-### CLuster GUI access
-To acces the TrinityX GUI setup a SOCKS v5 ssh tunnel:
+## 1. Network access
 
-Linux/MacOS:
-- In a terminal run: `ssh -N -D 9090 tunneluser@compute.kdg.be`. You can choose a port at will instead of 9090, just something above 1024.
-- The password is `HPC-access-2026!`
-- The SSH-command **will block** but don't close the terminal (unless you get an error) as this will keep the SSH-tunnel open to reach the login page.
-- Open your webbrowser and under network settings set a manual proxy with `localhost` and port `9090` or use the **Foxy Proxy plugin** (see below, which is the better option)
-Now all your webbrowser traffic will be directed over the SOCKS tunnel. Normal internet acces might not always work, but you can acces the cluster GUI. 
-- goto [https://controller1.cluster:8080](https://controller1.cluster:8080). You should see the login page of the TrinityX GUI.
-![alt text](images/login_page.png)
-- login with your school account credentials by clicking Azure SSO Login
-Remember to change your settings back to no proxy after you are done and disconnect the SSH tunnel by typing `logout`. 
+The cluster is only reachable from the KdG network.
 
-### Foxy Proxy Plugin
-For now at least, the controller node has internet access in order to install dependencies.  Be aware that you are effectively using the cluster to browse the internet. It may be better to use plugins like [foxyproxy](https://addons.mozilla.org/en-US/firefox/addon/foxyproxy-standard/) to manage proxy usage in the browser. With a simple rule you can set the browser to *only* use the SOCKS tunnel for the cluster GUI. For example: `://controller1.cluster:*` as an include rule of the wildcard type works. 
+- **On campus:** connect to the `KdG` WiFi SSID.
+  *Researchers: the cluster is not reachable on the `NxT-Research` SSID.*
+- **Remote:** connect with the **GlobalProtect VPN** —
+  [instructions (NL)](https://studentkdg.sharepoint.com/sites/intranet-nl-ict/SitePages/GlobalProtect-(VPN).aspx)
 
-You can mimick these settings:
+Nothing below works without one of these two.
 
-![alt text](images/foxyproxy.png)
+---
 
-Then select Proxy by Patterns and with will use the SOCKS proxy only for the cluster GUI based on the pattern you set.
+## 2. First-time setup — run one command
 
-![alt text](images/foxyproxy_patterns.png)
+You received an account name and a one-time password from the HPC team.
+With the VPN active, run the command for your platform. It takes about two minutes.
 
+**Windows (PowerShell)**
 
-### Starting a notebook. 
-For now we use the controller GUI to spin up a notebook
-In the GUI home page, click on Jupyter notebook under Interactive Apps. 
-- Fill in your user account
-For partition you can select:
-- `defg` the entire cluster, but is shared. Just select the number of nodes you need, max=8. 
-- `single_node` this is only node001 for debugging purposes. 
-Note: email notification is not yet setup.
-Click to connect, you will be taken to your home directory, from here you can create a notebook.
-Note: by default you will load into Jupyter Classic, but you can switch to Jypyter Lab as well und `View > Lab`
+```powershell
+irm https://raw.githubusercontent.com/KdG-OCDI/hpc-public/main/tools/kdg-hpc-setup.ps1 | iex
+```
 
-## Alerts
-in the KdG MS Teams environment the 'HPC' Teams has been configured to receive alerts from the clusters Grafana dashboard. No email alerts have been setup yet.
+**macOS / Linux (Terminal)**
 
-## SSH access 
-For SSH acces you need either a password or you need to add your SSH public key to the server. 
-to learn how to setup Key based authentication, see [Setup SSH](Setup%20SSH.md). 
+```bash
+curl -fsSL https://raw.githubusercontent.com/KdG-OCDI/hpc-public/main/tools/kdg-hpc-setup.sh | bash
+```
 
+Prefer to inspect the script before running it? Download it first:
 
-## Admin login
-open a terminal and login to controller over SSH: `ssh <username>@datalab.kdg.be`
-Password login to login node `compute.kdg.be` is enabled. 
+```bash
+curl -fsSL https://raw.githubusercontent.com/KdG-OCDI/hpc-public/main/tools/kdg-hpc-setup.sh -o kdg-hpc-setup.sh
+less kdg-hpc-setup.sh && bash kdg-hpc-setup.sh
+```
 
-**Note that in the future password loging will be disabled, so please add your public key to the server once logged in for the first time.**
+The script creates an `ed25519` key pair if you don't have one, installs your
+**public** key on the login node, writes a `kdg-compute` entry in your local
+`~/.ssh/config`, and verifies that password-less login works. Your **private**
+key never leaves your machine, and the script never reads or stores your
+password — you type it once at the login node's own SSH prompt.
+
+Running it again is safe; it is idempotent.
+
+Full walkthrough and troubleshooting: **[ONBOARDING.md](ONBOARDING.md)**
+Manual steps, WSL, ssh-agent and multiple keys: **[Setup SSH.md](Setup%20SSH.md)**
+
+### Connect
+
+```bash
+ssh kdg-compute
+```
+
+- **VS Code / Cursor** — install *Remote - SSH*, then `Connect to Host...` → `kdg-compute`
+- **PyCharm** — *Settings → Tools → SSH Configurations* → `kdg-compute`
+
+The script offers to replace your initial password with a strong random one and
+puts it on your clipboard — **save it in your password manager**. You will not
+need it for SSH after this setup, but it is your way back in if you ever lose
+your key.
+
+### Lost access?
+
+New laptop or lost key: just run the setup command again on the new machine.
+You will need your password for that step.
+
+Lost your password as well: contact the HPC team. Your identity is verified
+through your KdG school account.
+
+> Password authentication on the login node will be disabled in the future.
+> Make sure your public key is installed before then — the script above does this for you.
+
+---
+
+## 3. Cluster GUI access (TrinityX)
+
+The GUI is not exposed outside the cluster network, so you reach it through a
+SOCKS v5 tunnel over the login node. **This requires a working SSH account**
+(see section 2).
+
+1. Open the tunnel — it blocks; leave the terminal open:
+
+   ```bash
+   ssh -N -D 9090 kdg-compute
+   ```
+
+   Any port above 1024 works instead of 9090.
+
+2. Point your browser at the SOCKS proxy `localhost:9090`.
+   Use the [FoxyProxy](https://addons.mozilla.org/en-US/firefox/addon/foxyproxy-standard/)
+   extension rather than your system proxy settings (see below).
+
+3. Go to [https://controller1.cluster:8080](https://controller1.cluster:8080)
+   and click **Azure SSO Login** to sign in with your school account.
+
+   ![TrinityX login page](images/login_page.png)
+
+4. When you're done, close the tunnel with `Ctrl+C` and disable the proxy.
+
+### FoxyProxy (recommended)
+
+The controller node has internet access, so a system-wide proxy means you are
+browsing the internet *through the cluster*. FoxyProxy lets you route only
+cluster traffic through the tunnel. Add a wildcard include rule:
+
+```
+://controller1.cluster:*
+```
+
+Then select **Proxy by Patterns**.
+
+![FoxyProxy settings](images/foxyproxy.png)
+![FoxyProxy patterns](images/foxyproxy_patterns.png)
+
+---
+
+## 4. Starting a notebook
+
+From the GUI home page, click **Jupyter notebook** under *Interactive Apps*.
+
+- Fill in your user account.
+- Choose a partition:
+  - `defg` — the whole cluster, shared. Select the number of nodes you need (max 8).
+  - `single_node` — `node001` only, for debugging.
+- Click **Connect**. You land in your home directory.
+
+You start in Jupyter Classic; switch to JupyterLab via *View → Lab*.
+
+Email notifications are not configured yet.
+
+---
+
+## 5. Monitoring and alerts
+
+The **HPC** team in KdG MS Teams receives alerts from the cluster's Grafana
+dashboard. Email alerts are not configured yet.
+
+---
+
+## 6. Admin access
+
+```bash
+ssh <username>@datalab.kdg.be
+```
+
+---
+
+## Repository layout
+
+| Path | Contents |
+|---|---|
+| `README.md` | This file — start here |
+| `ONBOARDING.md` | Step-by-step first-time setup and troubleshooting |
+| `Setup SSH.md` | Manual SSH setup, WSL, ssh-agent, advanced configurations |
+| `tools/kdg-hpc-setup.ps1` | Automated setup script — Windows |
+| `tools/kdg-hpc-setup.sh` | Automated setup script — macOS / Linux |
+| `images/` | Screenshots used in this documentation |
+
+## Support
+
+Problems with the setup script? Open an issue and include the **full output**
+of the script (it contains no secrets).
