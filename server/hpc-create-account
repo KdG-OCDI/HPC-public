@@ -1,10 +1,16 @@
 #!/usr/bin/env bash
 #
-# hpc-create-account -- maak een cluster-account aan in de LDAP-directory
+# hpc-create-account -- maak een cluster-account aan
 #
-# Draait als root op de controller. Schrijft via de Unix-socket (ldapi:///),
-# zodat er nergens een LDAP-wachtwoord opgeslagen hoeft te worden: de kernel
-# levert de identiteit.
+# Draait als root op de controller. Het LDAP-werk doet `obol`, het
+# gebruikersbeheer van TrinityX: dat kent de bestaande structuur, deelt de
+# uid- en gid-nummers uit en houdt zijn eigen boekhouding bij. Twee dingen
+# die allebei nummers uitdelen, delen vroeg of laat hetzelfde nummer uit --
+# en twee accounts met hetzelfde uid kunnen elkaars bestanden lezen.
+#
+# Dit script voegt toe wat obol niet doet: naamcontrole, een SSH-sleutel
+# installeren, het schoolaccount vastleggen voor het SSO-portaal, en een
+# variant waarbij er helemaal geen wachtwoord bestaat.
 #
 #   hpc-create-account [opties] <gebruikersnaam>
 #
@@ -12,28 +18,23 @@
 #   --name "Voor Achter"   volledige naam
 #   --oid <object-id>      Entra object-ID van het schoolaccount (aanbevolen)
 #   --upn <e-mail>         schoolaccount, bv. voornaam.achternaam@kdg.be
+#                          Dit veld koppelt het schoolaccount aan dit account
+#                          bij het inloggen via SSO -- laat het niet weg.
 #   --key <bestand>        publieke SSH-sleutel meteen installeren; er wordt
-#                          dan GEEN wachtwoord gezet -- de gebruiker heeft er
-#                          geen nodig en er valt dus niets te lekken
+#                          dan GEEN wachtwoord gezet
 #   --with-password        toch een wachtwoord zetten, ook samen met --key
-#   --groups a,b           extra groepen naast de persoonlijke groep
+#   --groups a,b           extra groepen
 #   --shell <pad>          standaard /bin/bash
-#   --uid <n> / --gid <n>  handmatig in plaats van automatisch
-#   --no-home              home-directory niet aanmaken
-#   --dry-run              toon wat er zou gebeuren, schrijf niets
+#   --dry-run              toon wat er zou gebeuren, voer niets uit
 #
-# Exitcodes: 0 ok, 1 gebruiksfout, 2 preflight mislukt, 3 naam/nummer bezet
+# Exitcodes: 0 ok, 1 gebruiksfout, 2 preflight mislukt, 3 naam bezet
 
 set -euo pipefail
 
-BASE="dc=local"
-PEOPLE="ou=People,$BASE"
-GROUPBASE="ou=Group,$BASE"
-HOMEROOT=/trinity/home
+OBOL=/usr/local/sbin/obol
 REGISTRY=/var/lib/hpc-accounts/registry.tsv
 KEYHELPER=/usr/local/sbin/hpc-set-authorized-key
-UID_MIN=1050
-LDAP=(-Q -Y EXTERNAL -H ldapi:///)
+HOMEROOT=/trinity/home
 
 C_OK=$'\033[32m'; C_WARN=$'\033[33m'; C_ERR=$'\033[31m'; C_DIM=$'\033[90m'; C_OFF=$'\033[0m'
 [ -t 1 ] || { C_OK=""; C_WARN=""; C_ERR=""; C_DIM=""; C_OFF=""; }
@@ -47,8 +48,8 @@ audit() { logger -t hpc-create-account -p auth.notice -- "$*" || true; }
 # ----------------------------------------------------------------- argumenten
 USERNAME=""
 FULLNAME=""; OID=""; UPN=""; KEYFILE=""; EXTRA_GROUPS=""
-SHELL_PATH=/bin/bash; WANT_UID=""; WANT_GID=""
-DRYRUN=0; WITH_PASSWORD=0; MAKE_HOME=1; SKIP_ACL_CHECK=0
+SHELL_PATH=/bin/bash
+DRYRUN=0; WITH_PASSWORD=0
 
 while [ $# -gt 0 ]; do
   case "$1" in
@@ -58,13 +59,9 @@ while [ $# -gt 0 ]; do
     --key)            KEYFILE="${2:-}"; shift 2 ;;
     --groups)         EXTRA_GROUPS="${2:-}"; shift 2 ;;
     --shell)          SHELL_PATH="${2:-}"; shift 2 ;;
-    --uid)            WANT_UID="${2:-}"; shift 2 ;;
-    --gid)            WANT_GID="${2:-}"; shift 2 ;;
     --with-password)  WITH_PASSWORD=1; shift ;;
-    --no-home)        MAKE_HOME=0; shift ;;
-    --skip-acl-check) SKIP_ACL_CHECK=1; shift ;;
     --dry-run)        DRYRUN=1; shift ;;
-    -h|--help)        sed -n '3,25p' "$0" | cut -c3-; exit 0 ;;
+    -h|--help)        sed -n '3,30p' "$0" | cut -c3-; exit 0 ;;
     --*)              die "onbekende optie: $1" ;;
     *)                [ -z "$USERNAME" ] || die "meerdere gebruikersnamen opgegeven"
                       USERNAME="$1"; shift ;;
@@ -79,61 +76,14 @@ done
 # ------------------------------------------------------------------ preflight
 EXITCODE=2
 [ "$(id -u)" -eq 0 ] || die "moet als root draaien"
-
-for exe in ldapsearch ldapadd ldappasswd ldapmodify ldapdelete; do
-  command -v "$exe" >/dev/null 2>&1 || die "$exe ontbreekt (installeer openldap-clients)"
-done
-
-systemctl is-active --quiet slapd || die "slapd draait niet. Draai je dit op de controller?"
-
-ldapsearch "${LDAP[@]}" -b "$BASE" -s base dn >/dev/null 2>&1 \
-  || die "kan de directory niet lezen via ldapi:///. Draai je dit op de controller?"
-
-# Schrijfrecht vooraf controleren, zodat we geen half account achterlaten.
-# Let op: `ldapmodify -n` is hier nutteloos -- dat doet alsof en vraagt de
-# server niets, dus het slaagt ook zonder rechten. We kijken in plaats daarvan
-# of de ACL-regel voor lokale root bestaat.
-acl_uitleg() {
-  cat <<'UITLEG'
-Lokale root mag de directory wel lezen maar niet schrijven.
-
-Voeg op deze machine eenmalig deze regel toe:
-
-  slapcat -n0 -l /root/slapd-config-$(date +%F).ldif
-
-  cat <<'EOF' | ldapmodify -Y EXTERNAL -H ldapi:///
-  dn: olcDatabase={1}mdb,cn=config
-  changetype: modify
-  add: olcAccess
-  olcAccess: {0}to * by dn.exact="gidNumber=0+uidNumber=0,cn=peercred,cn=external,cn=auth" manage by * break
-  EOF
-
-Zie server/README.md, sectie "Write access", voor de uitleg en het
-terugdraaicommando. Weet je zeker dat het schrijfrecht anders geregeld is,
-gebruik dan --skip-acl-check.
-UITLEG
-}
-
-if [ "$SKIP_ACL_CHECK" -eq 0 ]; then
-  ACL_ID='gidNumber=0+uidNumber=0,cn=peercred,cn=external,cn=auth'
-  # LDIF vouwt lange regels af met een spatie; spaties en newlines weghalen
-  # maakt de vergelijking ongevoelig voor die opmaak. Vergelijken gebeurt met
-  # grep -F, want de identiteit bevat een '+' en dat is een quantifier in een
-  # reguliere expressie -- de match zou dan altijd mislukken.
-  acl_regels="$(ldapsearch "${LDAP[@]}" -LLL -b cn=config "(olcSuffix=$BASE)" olcAccess 2>/dev/null | tr -d '\n ')"
-  if ! printf '%s' "$acl_regels" | grep -qF "dn.exact=\"$ACL_ID\"manage" \
-     && ! printf '%s' "$acl_regels" | grep -qF "dn.exact=\"$ACL_ID\"write"; then
-    acl_uitleg >&2
-    die "geen schrijfrechten op de directory"
-  fi
-fi
+[ -x "$OBOL" ] || die "$OBOL niet gevonden. Draai je dit op de controller?"
+command -v getent >/dev/null 2>&1 || die "getent ontbreekt"
 
 if [ -n "$KEYFILE" ] && [ ! -r "$KEYFILE" ]; then
   die "sleutelbestand niet leesbaar: $KEYFILE"
 fi
-ok "preflight in orde"
 
-# ----------------------------------------------------------- naam en nummers
+# ----------------------------------------------------------- naam controleren
 EXITCODE=3
 case "$USERNAME" in
   [a-z_]*) ;;
@@ -148,157 +98,68 @@ esac
 getent passwd "$USERNAME" >/dev/null 2>&1 && die "gebruiker bestaat al: $USERNAME"
 getent group  "$USERNAME" >/dev/null 2>&1 && die "groep bestaat al: $USERNAME"
 
-ldap_max() { # $1 = filter, $2 = attribuut
-  ldapsearch "${LDAP[@]}" -LLL -b "$BASE" "$1" "$2" 2>/dev/null \
-    | awk -v a="$2:" '$1 == a { if ($2 + 0 > m) m = $2 + 0 } END { print m + 0 }'
-}
-
-# De tellers cn=uid en cn=gid lopen achter op de werkelijkheid (ze staan op
-# 1050 en 150 terwijl 1063 en 162 in gebruik zijn), dus we kijken naar wat er
-# daadwerkelijk bestaat. Een dubbel uitgedeeld UID betekent dat twee accounts
-# stilzwijgend elkaars bestanden kunnen lezen.
-if [ -z "$WANT_UID" ]; then
-  WANT_UID=$(( $(ldap_max '(objectClass=posixAccount)' uidNumber) + 1 ))
-  [ "$WANT_UID" -ge "$UID_MIN" ] || WANT_UID=$UID_MIN
-fi
-if [ -z "$WANT_GID" ]; then
-  WANT_GID=$(( $(ldap_max '(objectClass=posixGroup)' gidNumber) + 1 ))
-fi
-
-while getent passwd "$WANT_UID" >/dev/null 2>&1; do WANT_UID=$((WANT_UID + 1)); done
-while getent group  "$WANT_GID" >/dev/null 2>&1; do WANT_GID=$((WANT_GID + 1)); done
-
 FULLNAME="${FULLNAME:-$USERNAME}"
 SURNAME="${FULLNAME##* }"
 GIVEN="${FULLNAME% *}"
 [ "$GIVEN" = "$FULLNAME" ] && GIVEN=""
-HOMEDIR="$HOMEROOT/$USERNAME"
-TODAY_DAYS=$(( $(date +%s) / 86400 ))
 
-info "uid $WANT_UID, gid $WANT_GID, home $HOMEDIR"
+# Personeel in de groep staff, net als custom_mapping.sh doet bij SSO-logins,
+# zodat handmatig en automatisch aangemaakte accounts gelijk uitkomen.
+GROUPLIST="$EXTRA_GROUPS"
+case "$UPN" in
+  '') ;;
+  *@student.kdg.be) ;;
+  *@kdg.be) GROUPLIST="${GROUPLIST:+$GROUPLIST,}staff" ;;
+esac
 
-# ------------------------------------------------------------------- de LDIF
-build_ldif() {
-  printf 'dn: cn=%s,%s\n' "$USERNAME" "$GROUPBASE"
-  printf 'objectClass: top\n'
-  printf 'objectClass: groupOfMembers\n'
-  printf 'objectClass: posixGroup\n'
-  printf 'cn: %s\n' "$USERNAME"
-  printf 'gidNumber: %s\n' "$WANT_GID"
-  printf 'member: uid=%s,%s\n' "$USERNAME" "$PEOPLE"
-  printf '\n'
-  printf 'dn: uid=%s,%s\n' "$USERNAME" "$PEOPLE"
-  printf 'objectClass: top\n'
-  printf 'objectClass: person\n'
-  printf 'objectClass: organizationalPerson\n'
-  printf 'objectClass: inetOrgPerson\n'
-  printf 'objectClass: posixAccount\n'
-  printf 'objectClass: shadowAccount\n'
-  printf 'uid: %s\n' "$USERNAME"
-  printf 'cn: %s\n' "$FULLNAME"
-  printf 'sn: %s\n' "$SURNAME"
-  [ -n "$GIVEN" ] && printf 'givenName: %s\n' "$GIVEN"
-  [ -n "$UPN" ] && printf 'mail: %s\n' "$UPN"
-  printf 'loginShell: %s\n' "$SHELL_PATH"
-  printf 'uidNumber: %s\n' "$WANT_UID"
-  printf 'gidNumber: %s\n' "$WANT_GID"
-  printf 'homeDirectory: %s\n' "$HOMEDIR"
-  printf 'shadowMin: 0\n'
-  printf 'shadowMax: 99999\n'
-  printf 'shadowWarning: 7\n'
-  printf 'shadowExpire: -1\n'
-  printf 'shadowLastChange: %s\n' "$TODAY_DAYS"
-}
+# --------------------------------------------------------- het obol-commando
+obol_args=(user add "$USERNAME" --cn "$FULLNAME" --sn "$SURNAME" --shell "$SHELL_PATH")
+[ -n "$GIVEN" ]     && obol_args+=(--givenName "$GIVEN")
+[ -n "$UPN" ]       && obol_args+=(--mail "$UPN")
+[ -n "$GROUPLIST" ] && obol_args+=(--groups "$GROUPLIST")
+# --autogen-password laat obol het wachtwoord maken en tonen. Met --password
+# zou het in de procestabel staan en dus zichtbaar zijn voor elke gebruiker.
+[ "$WITH_PASSWORD" -eq 1 ] && obol_args+=(--autogen-password)
 
 if [ "$DRYRUN" -eq 1 ]; then
   echo
-  echo "--- zou dit naar de directory schrijven ---"
-  build_ldif
-  echo "-------------------------------------------"
-  [ -n "$EXTRA_GROUPS" ] && echo "plus lidmaatschap van: $EXTRA_GROUPS"
-  [ "$MAKE_HOME" -eq 1 ] && echo "plus home-directory $HOMEDIR uit /etc/skel"
-  [ "$WITH_PASSWORD" -eq 1 ] && echo "plus een willekeurig wachtwoord van 24 tekens"
+  echo "--- zou dit uitvoeren ---"
+  printf '%s' "$OBOL"; printf ' %q' "${obol_args[@]}"; echo
+  echo "-------------------------"
   [ -n "$KEYFILE" ] && echo "plus de SSH-sleutel uit $KEYFILE"
+  [ "$WITH_PASSWORD" -eq 0 ] && echo "geen wachtwoord: alleen toegang met de sleutel"
+  [ -n "$OID" ] && echo "plus een regel in $REGISTRY met object-ID $OID"
   echo
   exit 0
 fi
 
-# -------------------------------------------------------------------- aanmaken
+# ------------------------------------------------------------------ aanmaken
 EXITCODE=1
-if ! addout="$(build_ldif | ldapadd "${LDAP[@]}" 2>&1)"; then
-  printf '%s\n' "$addout" >&2
-  printf '%s' "$addout" | grep -q 'Insufficient access' && acl_uitleg >&2
-  die "ldapadd is mislukt"
+if ! obol_out="$("$OBOL" "${obol_args[@]}" 2>&1)"; then
+  printf '%s\n' "$obol_out" >&2
+  die "obol user add is mislukt"
 fi
-ok "LDAP-entry aangemaakt"
+ok "account aangemaakt via obol"
 
 # Vanaf hier opruimen bij een fout: een half account is erger dan geen account.
 cleanup_on_error() {
-  warn "er ging iets mis; het halve account wordt opgeruimd"
-  ldapdelete "${LDAP[@]}" "uid=$USERNAME,$PEOPLE" 2>/dev/null || true
-  ldapdelete "${LDAP[@]}" "cn=$USERNAME,$GROUPBASE" 2>/dev/null || true
+  warn "er ging iets mis; het account wordt weer verwijderd"
+  "$OBOL" user delete "$USERNAME" >/dev/null 2>&1 || true
 }
 trap cleanup_on_error ERR
 
-# --- extra groepen -----------------------------------------------------------
-if [ -n "$EXTRA_GROUPS" ]; then
-  IFS=',' read -ra glist <<< "$EXTRA_GROUPS"
-  for g in "${glist[@]}"; do
-    g="$(printf '%s' "$g" | tr -d '[:space:]')"
-    [ -n "$g" ] || continue
-    if ldapsearch "${LDAP[@]}" -LLL -b "cn=$g,$GROUPBASE" -s base dn >/dev/null 2>&1; then
-      ldapmodify "${LDAP[@]}" >/dev/null <<LDIFGROUP
-dn: cn=$g,$GROUPBASE
-changetype: modify
-add: member
-member: uid=$USERNAME,$PEOPLE
-LDIFGROUP
-      ok "toegevoegd aan groep $g"
-    else
-      warn "groep $g bestaat niet, overgeslagen"
-    fi
-  done
-fi
-
-# --- tellers bijwerken -------------------------------------------------------
-# Best effort: ze lopen toch al achter, maar we laten ze niet verder afdrijven.
-for pair in "cn=uid,$BASE:$((WANT_UID + 1))" "cn=gid,$BASE:$((WANT_GID + 1))"; do
-  dn="${pair%:*}"
-  val="${pair##*:}"
-  ldapmodify "${LDAP[@]}" >/dev/null 2>&1 <<LDIFCOUNT || true
-dn: $dn
-changetype: modify
-replace: uidNumber
-uidNumber: $val
-LDIFCOUNT
-done
-
-# --- home directory ----------------------------------------------------------
-if [ "$MAKE_HOME" -eq 1 ]; then
-  if [ -e "$HOMEDIR" ]; then
-    warn "$HOMEDIR bestaat al, ongemoeid gelaten"
-  else
-    mkdir -p "$HOMEDIR"
-    cp -rT /etc/skel "$HOMEDIR" 2>/dev/null || true
-    chown -R "$WANT_UID:$WANT_GID" "$HOMEDIR"
-    chmod 0700 "$HOMEDIR"
-    ok "home aangemaakt: $HOMEDIR"
-  fi
-fi
-
-# --- wachtwoord --------------------------------------------------------------
 NEWPW=""
 if [ "$WITH_PASSWORD" -eq 1 ]; then
-  NEWPW="$(set +o pipefail; LC_ALL=C tr -dc 'A-Za-z0-9_.!@#%+=-' < /dev/urandom | head -c 24)"
-  [ "${#NEWPW}" -eq 24 ] || die "kon geen wachtwoord genereren"
-  # Via -T en een tijdelijk bestand: met -s zou het wachtwoord in `ps` staan.
-  pwfile="$(mktemp)"
-  chmod 600 "$pwfile"
-  printf '%s' "$NEWPW" > "$pwfile"
-  ldappasswd "${LDAP[@]}" -T "$pwfile" "uid=$USERNAME,$PEOPLE" >/dev/null
-  shred -u "$pwfile" 2>/dev/null || rm -f "$pwfile"
-  ok "wachtwoord ingesteld"
+  NEWPW="$(printf '%s' "$obol_out" | sed -n 's/^Generated password for user .*: //p' | head -1)"
+  [ -n "$NEWPW" ] || warn "kon het gegenereerde wachtwoord niet uit de uitvoer van obol lezen"
 fi
+
+getent passwd "$USERNAME" >/dev/null 2>&1 || die "obol meldde succes maar het account is niet zichtbaar"
+
+NEWUID="$(getent passwd "$USERNAME" | cut -d: -f3)"
+NEWGID="$(getent passwd "$USERNAME" | cut -d: -f4)"
+HOMEDIR="$(getent passwd "$USERNAME" | cut -d: -f6)"
+HOMEDIR="${HOMEDIR:-$HOMEROOT/$USERNAME}"
 
 # --- SSH-sleutel -------------------------------------------------------------
 if [ -n "$KEYFILE" ]; then
@@ -306,8 +167,8 @@ if [ -n "$KEYFILE" ]; then
     "$KEYHELPER" "$USERNAME" < "$KEYFILE" >/dev/null
     ok "SSH-sleutel geinstalleerd via $KEYHELPER"
   else
-    install -d -m 0700 -o "$WANT_UID" -g "$WANT_GID" "$HOMEDIR/.ssh"
-    install -m 0600 -o "$WANT_UID" -g "$WANT_GID" "$KEYFILE" "$HOMEDIR/.ssh/authorized_keys"
+    install -d -m 0700 -o "$NEWUID" -g "$NEWGID" "$HOMEDIR/.ssh"
+    install -m 0600 -o "$NEWUID" -g "$NEWGID" "$KEYFILE" "$HOMEDIR/.ssh/authorized_keys"
     ok "SSH-sleutel in $HOMEDIR/.ssh/authorized_keys"
   fi
 fi
@@ -323,19 +184,21 @@ if [ ! -f "$REGISTRY" ]; then
   chmod 0600 "$REGISTRY"
 fi
 printf '%s\t%s\t%s\t%s\t%s\t%s\n' \
-  "$USERNAME" "$WANT_UID" "${OID:--}" "${UPN:--}" "$(date -Is)" "${SUDO_USER:-root}" >> "$REGISTRY"
+  "$USERNAME" "$NEWUID" "${OID:--}" "${UPN:--}" "$(date -Is)" "${SUDO_USER:-root}" >> "$REGISTRY"
 
-[ -z "$OID" ] && warn "geen --oid opgegeven; het portaal kan dit account later niet automatisch koppelen"
+[ -z "$UPN" ] && warn "geen --upn opgegeven; inloggen via SSO vindt dit account niet terug"
+[ -z "$OID" ] && warn "geen --oid opgegeven; bij een naamswijziging is de koppeling niet te herstellen"
 
-audit "user=$USERNAME uid=$WANT_UID gid=$WANT_GID oid=${OID:--} upn=${UPN:--} by=${SUDO_USER:-root}"
+audit "user=$USERNAME uid=$NEWUID gid=$NEWGID oid=${OID:--} upn=${UPN:--} by=${SUDO_USER:-root}"
 
-# -------------------------------------------------------------------- overzicht
+# ------------------------------------------------------------------ overzicht
 echo
 echo "  Account aangemaakt"
 echo "  =================="
 echo "  gebruikersnaam : $USERNAME"
-echo "  uid / gid      : $WANT_UID / $WANT_GID"
+echo "  uid / gid      : $NEWUID / $NEWGID"
 echo "  home           : $HOMEDIR"
+[ -n "$GROUPLIST" ] && echo "  groepen        : $USERNAME, $GROUPLIST"
 if [ -n "$NEWPW" ]; then
   echo
   echo "  eenmalig wachtwoord : $NEWPW"
@@ -344,7 +207,7 @@ if [ -n "$NEWPW" ]; then
   warn "Na het setupscript heeft de gebruiker het niet meer nodig."
 else
   echo
-  ok "Geen wachtwoord nodig: de sleutel staat er al."
+  ok "Geen wachtwoord: alleen toegang met de SSH-sleutel."
 fi
 echo
 echo "  Stuur de gebruiker deze instructie:"
