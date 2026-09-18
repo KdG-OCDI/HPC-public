@@ -23,6 +23,10 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
+# Zonder dit tekent Test-NetConnection een voortgangsbalk over de rest van het
+# scherm heen -- inclusief de wachtwoordprompt van ssh, die een paar stappen
+# later verschijnt. De gebruiker ziet dan "password: ttempting TCP connect".
+$ProgressPreference = 'SilentlyContinue'
 $script:Step = 0
 
 function Write-Step  { $script:Step++; Write-Host ""; Write-Host "[$script:Step] $args" -ForegroundColor Cyan }
