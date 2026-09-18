@@ -5,3 +5,4 @@
 *.md    text
 images/* binary
 server/hpc-set-authorized-key text eol=lf
+server/hpc-create-account text eol=lf
