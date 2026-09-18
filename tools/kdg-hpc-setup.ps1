@@ -114,7 +114,13 @@ $remote = "umask 077; mkdir -p ~/.ssh; touch ~/.ssh/authorized_keys; chmod 700 ~
 $out = ssh -n -o PreferredAuthentications=password,keyboard-interactive `
            -o PubkeyAuthentication=no `
            "$User@$ClusterHost" $remote 2>&1
-if ($LASTEXITCODE -ne 0 -or ($out -notmatch 'SLEUTEL_GEPLAATST')) {
+# Let op: $out is een array regels, en -match/-notmatch filtert een array in
+# plaats van een ja/nee te geven. Bij een mislukte eerste wachtwoordpoging
+# blijven er regels over die de melding niet bevatten, en dan zou een niet-lege
+# lijst hier als "waar" gelden -- fout gemeld terwijl de sleutel er wel staat.
+# Eerst samenvoegen tot een tekstblok maakt de vergelijking een echte test.
+$outText = ($out | Out-String)
+if ($outText -notmatch 'SLEUTEL_GEPLAATST') {
     Write-Host ($out -join "`n") -ForegroundColor DarkGray
     Die "Kopieren van de sleutel is mislukt. Klopt je accountnaam en wachtwoord?"
 }
@@ -157,7 +163,8 @@ Write-Ok "Host '$Alias' toegevoegd aan $cfgPath"
 # -------------------------------------------------------------- 7. Verifieren
 Write-Step "Wachtwoordloos inloggen testen"
 $test = ssh -n -o BatchMode=yes -o ConnectTimeout=15 $Alias "echo LOGIN_OK; hostname" 2>&1
-if ($test -match 'LOGIN_OK') {
+$testText = ($test | Out-String)
+if ($testText -match 'LOGIN_OK') {
     Write-Ok "Verbinding werkt zonder wachtwoord"
     Write-Info ("Loginnode: " + (($test | Where-Object { $_ -notmatch 'LOGIN_OK' }) -join ''))
 } else {
