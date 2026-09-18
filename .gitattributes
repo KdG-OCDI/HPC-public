@@ -4,3 +4,4 @@
 *.ps1   text eol=crlf
 *.md    text
 images/* binary
+server/hpc-set-authorized-key text eol=lf

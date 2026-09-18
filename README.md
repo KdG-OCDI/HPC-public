@@ -168,6 +168,7 @@ ssh <username>@datalab.kdg.be
 | `Setup SSH.md` | Manual SSH setup, WSL, ssh-agent, advanced configurations |
 | `tools/kdg-hpc-setup.ps1` | Automated setup script — Windows |
 | `tools/kdg-hpc-setup.sh` | Automated setup script — macOS / Linux |
+| `server/` | Login-node configuration: centrally managed SSH keys |
 | `images/` | Screenshots used in this documentation |
 
 ## Support

@@ -1,0 +1,122 @@
+#!/usr/bin/env bash
+#
+# hpc-set-authorized-key -- schrijf de SSH-publieke sleutel van een gebruiker
+#                           naar /etc/ssh/authorized_keys.d/<user>
+#
+# Bedoeld om als root te draaien, aangeroepen via een nauwe sudo-regel door de
+# self-serviceportaal-service. De sleutel komt binnen op stdin.
+#
+#   hpc-set-authorized-key [--replace|--add|--remove-all] <username> < key.pub
+#
+#   --replace     (standaard) vervang alle sleutels van deze gebruiker
+#   --add         voeg toe aan de bestaande sleutels (dubbels worden genegeerd)
+#   --remove-all  verwijder alle sleutels; leest geen stdin
+#
+# Exitcodes: 0 ok, 1 gebruiksfout, 2 ongeldige sleutel, 3 onbekende gebruiker
+#
+# Waarom niet gewoon ~/.ssh/authorized_keys schrijven?
+#   - De gebruiker kan zijn eigen home aanpassen; sleutels in een root-owned
+#     directory kunnen niet door de gebruiker (of malware in zijn account)
+#     worden uitgebreid.
+#   - sshd weigert ~/.ssh stil als de rechten te ruim staan (StrictModes).
+#     Een root-owned pad haalt die klasse supportvragen weg.
+
+set -euo pipefail
+
+KEYDIR=/etc/ssh/authorized_keys.d
+MIN_RSA_BITS=3072
+MAX_INPUT_BYTES=16384
+
+die() { echo "hpc-set-authorized-key: $*" >&2; exit "${2:-1}"; }
+audit() { logger -t hpc-set-authorized-key -p auth.notice -- "$*" || true; }
+
+[ "$(id -u)" -eq 0 ] || die "moet als root draaien"
+
+MODE=replace
+case "${1:-}" in
+  --replace)    MODE=replace;    shift ;;
+  --add)        MODE=add;        shift ;;
+  --remove-all) MODE=remove-all; shift ;;
+  --*)          die "onbekende optie: $1" ;;
+esac
+
+USERNAME="${1:-}"
+[ -n "$USERNAME" ] || die "gebruik: $0 [--replace|--add|--remove-all] <username> < key.pub"
+[ $# -le 1 ] || die "te veel argumenten"
+
+# --- gebruiker valideren -----------------------------------------------------
+# Alleen echte, niet-systeemaccounts. Dit is de belangrijkste grens: zelfs als
+# de aanroepende service gecompromitteerd is, kan die geen sleutel voor root of
+# een serviceaccount plaatsen.
+case "$USERNAME" in
+  ''|*[!a-z0-9._-]*) die "ongeldige gebruikersnaam" 3 ;;
+esac
+
+pwent="$(getent passwd "$USERNAME" || true)"
+[ -n "$pwent" ] || die "onbekende gebruiker: $USERNAME" 3
+
+uid="$(printf '%s' "$pwent" | cut -d: -f3)"
+[ "$uid" -ge 1000 ] || die "weigert systeemaccount (uid $uid): $USERNAME" 3
+
+install -d -m 0755 -o root -g root "$KEYDIR"
+target="$KEYDIR/$USERNAME"
+
+# --- verwijderen -------------------------------------------------------------
+if [ "$MODE" = remove-all ]; then
+    if [ -f "$target" ]; then
+        cp -p "$target" "$target.bak"
+        : > "$target"
+        chmod 0644 "$target"
+    fi
+    audit "user=$USERNAME action=remove-all by=${SUDO_USER:-root}"
+    echo "Alle sleutels van $USERNAME verwijderd."
+    exit 0
+fi
+
+# --- sleutel inlezen en valideren --------------------------------------------
+key="$(head -c "$MAX_INPUT_BYTES" | tr -d '\r')"
+key="$(printf '%s' "$key" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')"
+
+[ -n "$key" ] || die "geen sleutel op stdin" 2
+[ "$(printf '%s' "$key" | wc -l)" -eq 0 ] || die "meerdere regels; verwacht precies een sleutel" 2
+
+# Een authorized_keys-regel mag vooraan opties dragen (command=, from=,
+# permitopen=, environment=). Die accepteren we niet: de regel moet beginnen
+# met het sleuteltype, anders zou de aanvrager commando's kunnen laten draaien.
+keytype="$(printf '%s' "$key" | cut -d' ' -f1)"
+case "$keytype" in
+  ssh-ed25519|ecdsa-sha2-nistp256|ecdsa-sha2-nistp384|ecdsa-sha2-nistp521|ssh-rsa|sk-ssh-ed25519@openssh.com|sk-ecdsa-sha2-nistp256@openssh.com) ;;
+  *) die "niet-ondersteund of ongeldig sleuteltype: '$keytype' (opties voor de sleutel zijn niet toegestaan)" 2 ;;
+esac
+
+tmpkey="$(mktemp)"
+trap 'rm -f "$tmpkey" "${tmpnew:-}"' EXIT
+printf '%s\n' "$key" > "$tmpkey"
+
+fingerprint="$(ssh-keygen -l -f "$tmpkey" 2>/dev/null)" || die "sleutel is niet leesbaar voor ssh-keygen" 2
+bits="$(printf '%s' "$fingerprint" | awk '{print $1}')"
+
+if [ "$keytype" = ssh-rsa ] && [ "$bits" -lt "$MIN_RSA_BITS" ]; then
+    die "RSA-sleutel te kort ($bits bits, minimaal $MIN_RSA_BITS). Gebruik bij voorkeur ed25519." 2
+fi
+
+# --- atomisch wegschrijven ---------------------------------------------------
+tmpnew="$(mktemp "$KEYDIR/.$USERNAME.XXXXXX")"
+if [ "$MODE" = add ] && [ -f "$target" ]; then
+    cat "$target" > "$tmpnew"
+    if grep -qxF "$key" "$tmpnew"; then
+        echo "Sleutel stond er al; niets gewijzigd."
+        audit "user=$USERNAME action=add result=duplicate fp=$fingerprint by=${SUDO_USER:-root}"
+        exit 0
+    fi
+fi
+printf '%s\n' "$key" >> "$tmpnew"
+
+chown root:root "$tmpnew"
+chmod 0644 "$tmpnew"
+[ -f "$target" ] && cp -p "$target" "$target.bak"
+mv -f "$tmpnew" "$target"
+tmpnew=""
+
+audit "user=$USERNAME action=$MODE fp=$fingerprint by=${SUDO_USER:-root}"
+echo "Sleutel geplaatst voor $USERNAME: $fingerprint"
