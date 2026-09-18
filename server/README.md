@@ -128,42 +128,20 @@ the user can still log in.
 
 ## 5. Creating accounts
 
-Cluster accounts do not live in `/etc/passwd`; they live in the OpenLDAP
-directory on the controller (`dc=local`), which every node consults through
-SSSD. So accounts are created there, not with `useradd` on the login node — a
-local account would exist on one node only, invisible to the compute nodes and
-showing up as a bare UID number on NFS.
+Cluster accounts do not live in `/etc/passwd`. They live in the OpenLDAP
+directory on the controller (`dc=local`), which every node reads through SSSD,
+so they are created there — not with `useradd` on the login node, which would
+produce an account that exists on one node only.
 
-### Write access
+TrinityX ships `obol` for exactly this. It knows the existing structure,
+allocates UID and GID numbers and keeps its own bookkeeping in `cn=uid` and
+`cn=gid`. Write your own LDIF alongside it and the two allocators will
+eventually hand out the same number — two accounts sharing a UID can read and
+write each other's files, because the filesystem only ever sees the number.
 
-Reads over the Unix socket work out of the box, but writes do not: local root
-authenticates as `gidNumber=0+uidNumber=0,cn=peercred,cn=external,cn=auth`,
-which the existing ACLs only grant read. Rather than storing the `cn=Manager`
-password in a file, grant that identity write access once:
-
-```bash
-slapcat -n0 -l /root/slapd-config-$(date +%F).ldif
-
-cat <<'EOF' | ldapmodify -Y EXTERNAL -H ldapi:///
-dn: olcDatabase={1}mdb,cn=config
-changetype: modify
-add: olcAccess
-olcAccess: {0}to * by dn.exact="gidNumber=0+uidNumber=0,cn=peercred,cn=external,cn=auth" manage by * break
-EOF
-```
-
-`by * break` is what keeps this safe: every other identity falls through to the
-existing rules unchanged, including `by self write` on `userPassword` — without
-it, users could no longer change their own password.
-
-Credentials then live nowhere. The kernel vouches for the caller through the
-socket, so there is no secret to leak, rotate or accidentally commit.
-
-To undo:
-
-```bash
-printf 'dn: olcDatabase={1}mdb,cn=config\nchangetype: modify\ndelete: olcAccess\nolcAccess: {0}\n' | ldapmodify -Y EXTERNAL -H ldapi:///
-```
+`hpc-create-account` therefore calls `obol` for the account itself and adds
+only what obol does not do: name validation, installing an SSH key, recording
+the school account for SSO, and a variant where no password is created at all.
 
 ### Install
 
@@ -173,7 +151,8 @@ sudo install -o root -g root -m 0755 hpc-create-account /usr/local/sbin/
 
 ### Usage
 
-Always look first:
+Always look first — `--dry-run` prints the exact `obol` command and runs
+nothing:
 
 ```bash
 hpc-create-account --dry-run --name "Jan Janssens" --upn jan.janssens@kdg.be jan.janssens
@@ -195,35 +174,59 @@ hpc-create-account --name "Jan Janssens" --upn jan.janssens@kdg.be --oid <entra-
 The second form is preferable: a password that does not exist cannot be
 intercepted, reused or forgotten.
 
-### What it does
+### Always pass `--upn`
 
-Creates a personal group (`cn=<user>,ou=Group,dc=local`, `groupOfMembers` +
-`posixGroup`) and the account (`uid=<user>,ou=People,dc=local`, matching the
-object classes of the existing accounts), creates the home directory from
-`/etc/skel`, optionally sets a random 24-character password via `ldappasswd`,
-optionally installs an SSH key, and records the account in
-`/var/lib/hpc-accounts/registry.tsv`.
+The SSO login maps a school account to a cluster account by searching LDAP for
+`(mail=<address>)`. An account without `mail` is invisible to that search, and
+the mapping script then concludes the person is new and creates a second
+account beside the existing one. `--upn` fills that field.
 
-If any step after the LDAP write fails, it removes what it created. A half
-account is worse than none.
+`--oid` records the Entra object ID next to it in
+`/var/lib/hpc-accounts/registry.tsv`. It is the only identifier that never
+changes — names and addresses do, on a name change, when duplicates get a `.1`
+suffix, and when a student becomes staff and moves from `@student.kdg.be` to
+`@kdg.be`.
 
-### Two things to know
+A `@kdg.be` address (not `@student.kdg.be`) also adds the account to `staff`,
+matching what the SSO mapping script does, so accounts created by hand and
+accounts created by a first SSO login come out the same.
 
-**UID allocation ignores `cn=uid,dc=local`.** That counter says the next free
-UID is 1050 while 1063 is already in use, so trusting it would hand out a UID
-that already belongs to someone — and two accounts sharing a UID silently share
-each other's files. The script scans for the highest number actually in use and
-verifies the result against `getent` before using it. It does bump the counters
-afterwards, so they stop drifting further.
+### Removing an account
 
-**Record the Entra object ID with `--oid`.** It is the only identifier that
-never changes. Names and email addresses do: on a name change, when duplicates
-get a `.1` suffix, and when a student becomes staff and moves from
-`@student.kdg.be` to `@kdg.be`. Matching on anything else will eventually match
-the wrong person, and the planned self-service portal depends on it.
+```bash
+obol user delete <username>
+```
+
+Check afterwards whether the home directory is gone. Files keep their UID
+number, and obol reissues numbers once they are free, so an orphaned home
+eventually becomes readable by whoever gets that number next. Either delete it
+or `chown` it to root when archiving.
 
 ### Not needed here
 
 `AccountingStorageEnforce` is `none`, so no Slurm association is required to
 submit jobs. If that ever changes, account creation will also need
 `sacctmgr create user`.
+
+### Direct LDAP write access is no longer required
+
+An earlier version of this script wrote LDIF itself, which needed an ACL rule
+granting local root write access to the directory. `obol` authenticates with
+its own credentials from `/etc/obol.conf`, so that rule is not needed any more.
+
+If it was added and you want it gone:
+
+```bash
+printf 'dn: olcDatabase={1}mdb,cn=config\nchangetype: modify\ndelete: olcAccess\nolcAccess: {0}\n' | ldapmodify -Y EXTERNAL -H ldapi:///
+```
+
+Check what index the rule actually has first — deleting `{0}` removes whatever
+sits in that position:
+
+```bash
+ldapsearch -LLL -Y EXTERNAL -H ldapi:/// -b cn=config '(olcSuffix=dc=local)' olcAccess
+```
+
+Keeping it is defensible too: it lets local root inspect and repair the
+directory without the `cn=Manager` password. It grants nothing to anyone but
+root on the controller.
