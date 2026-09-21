@@ -64,8 +64,8 @@ not have them yet, get in touch.
 
 ## Hulp · Support
 
-Problemen met het setupscript? Open een issue en plak de **volledige uitvoer**
+Problemen met het setupscript? Open een [issue](https://github.com/KdG-OCDI/hpc-public/issues) of mail [compute@kdg.be](mailto:compute@kdg.be), met de **volledige uitvoer**
 van het script erbij — die bevat geen geheimen.
 
-Trouble with the setup script? Open an issue and include the **full output** of
+Trouble with the setup script? Open an [issue](https://github.com/KdG-OCDI/hpc-public/issues) or mail [compute@kdg.be](mailto:compute@kdg.be), with the **full output** of
 the script — it contains no secrets.

@@ -2,14 +2,15 @@
 
 *[Nederlandse versie](nl.md) · [back to the start page](../README.md)*
 
-The HPC team has mailed you an account name and a one-time password.
-The steps below set up your access in about two minutes.
+The HPC team has mailed you an account name and a password. The steps below set
+up your access in about two minutes.
 
 | | |
 |---|---|
 | **Login node (SSH)** | `compute.kdg.be` |
-| **Web portal** | Open OnDemand, through a tunnel (see [step 5](#5-the-graphical-environment)) |
+| **Your directory** | `/trinity/home/your_username`, visible on every node |
 | **Scheduler** | Slurm — `sbatch`, `srun`, `squeue` |
+| **Web portal** | Open OnDemand, through a tunnel (see [5.3](#53-a-jupyter-notebook-through-the-portal)) |
 
 ---
 
@@ -68,17 +69,18 @@ Running it again is always safe — it applies nothing twice.
 | 5 | Installs your **public** key on the login node |
 | 6 | Adds a `kdg-compute` block to your local `~/.ssh/config` |
 | 7 | Verifies that password-less login works |
-| 8 | Offers to replace your password with a strong random one |
 
 Your **private** key never leaves your laptop.
 
 ---
 
-## 3. Connecting
+## 3. Test your connection
 
 ```bash
 ssh kdg-compute
 ```
+
+You land on the login node without a password. Leave again with `exit`.
 
 `kdg-compute` is the name the script wrote into your `~/.ssh/config` — not an
 address on the internet. If you have not run step 2, use your account name and
@@ -88,34 +90,17 @@ the real address:
 ssh your_username@compute.kdg.be
 ```
 
-**From your editor:**
-
-- **VS Code / Cursor** — install the
-  [Remote - SSH](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-ssh)
-  extension, then `Ctrl+Shift+P` → *Remote-SSH: Connect to Host...* →
-  `kdg-compute`
-- **PyCharm** — *Settings → Tools → SSH Configurations* → `kdg-compute`
-
-From there you open folders on the server and submit jobs with Slurm.
-
 ---
 
 ## 4. Your password
 
-There are two passwords in play, and the difference is worth getting straight.
+You needed the password from the mail once, in step 2. Not any more: from here
+on you log in with your key.
 
-The one **from the email** is a starter password. You use it once, in step 5 of
-the script. Step 8 then replaces it with a strong random one and puts that on
-your clipboard.
+**Keep that mail anyway**, or move the password to your password manager. It is
+your way back in if you ever lose your key.
 
-> **Save that new password in your password manager.** From that moment on, the
-> one from the email no longer works.
-
-For everyday use you need neither — logging in goes through your key. The new
-password is your way back in if you ever lose that key.
-
-If you skipped step 8, the password from the email stays valid. Replace it
-later instead:
+To replace it with one of your own, once your connection works:
 
 ```bash
 ssh kdg-compute passwd
@@ -123,16 +108,110 @@ ssh kdg-compute passwd
 
 ---
 
-## 5. The graphical environment
+## 5. Working on the cluster
 
-For Jupyter notebooks in your browser. This needs a working SSH account, so do
-step 2 first.
+There are two ways, and most people use the first.
+
+### 5.1 With VS Code, Cursor or PyCharm
+
+You edit files on the cluster as if they were local, with your own editor,
+extensions and shortcuts. Your terminal runs on the cluster.
+
+**VS Code or Cursor**
+
+1. Install the
+   [Remote - SSH](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-ssh)
+   extension.
+2. `Ctrl+Shift+P` → *Remote-SSH: Connect to Host...* → `kdg-compute`.
+3. A new window opens. The bottom left says **SSH: kdg-compute**.
+4. *File → Open Folder* → your own directory, for example
+   `/trinity/home/your_username`.
+5. *Terminal → New Terminal* gives you a shell on the login node.
+
+The first time, VS Code installs a small helper on the server. That takes a
+moment and does not happen again.
+
+**PyCharm** — *Settings → Tools → SSH Configurations* → `kdg-compute`, then
+attach it to a *Remote Interpreter* or *Deployment*.
+
+> Work in your own directory under `/trinity/home/`. It lives on shared storage
+> and is therefore visible on whichever node your job lands. Files you put
+> outside it on one node cannot be seen elsewhere.
+
+### 5.2 Submitting work with Slurm
+
+This is the most important thing to know, and the thing that most often goes
+wrong.
+
+**The login node is not for computing.** There you edit files, install things
+and submit work. The actual computing goes to the compute nodes, and Slurm
+distributes it. Run a heavy script directly on the login node and you get in
+the way of everyone trying to log in at that moment.
+
+**Submitting a job.** Create a file `job.sh`:
+
+```bash
+#!/bin/bash
+#SBATCH --job-name=my-first-job
+#SBATCH --partition=defg
+#SBATCH --nodes=1
+#SBATCH --ntasks=1
+#SBATCH --cpus-per-task=4
+#SBATCH --time=01:00:00
+#SBATCH --output=slurm-%j.out
+
+hostname
+python3 my_script.py
+```
+
+Submit and follow it:
+
+```bash
+sbatch job.sh          # submits the job, prints the job number
+squeue -u $USER        # shows your own jobs and their state
+scancel <jobnumber>    # stops a job
+```
+
+The output ends up in `slurm-<jobnumber>.out`, in the directory where you ran
+`sbatch`.
+
+**Partitions.** `--partition` decides where your job runs:
+
+| Partition | For |
+|---|---|
+| `defg` | The whole cluster, shared. Up to 8 nodes |
+| `single_node` | `node001` only, for debugging |
+
+**Working interactively.** To type commands on a compute node yourself instead
+of submitting a script:
+
+```bash
+srun --partition=defg --cpus-per-task=4 --time=01:00:00 --pty bash
+```
+
+That gives you a shell on a compute node. Leave with `exit` as soon as you are
+done — while that shell is open, the capacity stays reserved for you.
+
+**What is running:**
+
+```bash
+sinfo                  # which nodes exist and whether they are free
+squeue                 # every job in the queue
+```
+
+> Which software is available and how to set up your environment differs per
+> field. Ask the HPC team at [compute@kdg.be](mailto:compute@kdg.be).
+
+### 5.3 A Jupyter notebook through the portal
+
+Useful if you prefer to work in your browser. This needs a working SSH account,
+so do step 2 first.
 
 The portal runs on an address that only exists inside the cluster network. Your
 browser cannot resolve that name, not even on the VPN. So you send your browser
 traffic through a tunnel that resolves the name on the cluster side.
 
-### Step 1 — open the tunnel
+**Step 1 — open the tunnel**
 
 ```bash
 ssh -N -D 9090 kdg-compute
@@ -141,7 +220,7 @@ ssh -N -D 9090 kdg-compute
 This command blocks and prints nothing. That is expected: leave the window open
 while you use the portal. Any port number above 1024 works instead of 9090.
 
-### Step 2 — send your browser through the tunnel
+**Step 2 — send your browser through the tunnel**
 
 Use [FoxyProxy](https://addons.mozilla.org/firefox/addon/foxyproxy-standard/),
 available for Firefox, Chrome and Edge. You can also do this in your operating
@@ -168,45 +247,55 @@ Then add a rule of type *wildcard* with this pattern, and select
 > itself. Doing this through your system settings often fails for exactly this
 > reason.
 
-### Step 3 — open the portal
+**Step 3 — open the portal**
 
 Go to [https://controller1.cluster:8080](https://controller1.cluster:8080) and
 click **Azure SSO Login** to sign in with your school account.
 
 ![Login page](../images/login_page.png)
 
-### Step 4 — start a notebook
+**Step 4 — start a notebook**
 
 On the home page, click **Jupyter notebook** under *Interactive Apps*.
 
 - Fill in your account name.
-- Choose a partition:
-  - `defg` — the whole cluster, shared. Select the number of nodes you need,
-    up to 8.
-  - `single_node` — `node001` only, for debugging.
+- Choose a partition: `defg` for ordinary work, `single_node` for debugging.
+- Choose the number of nodes you need, up to 8.
 - Click **Connect**. You land in your own directory.
 
 You start in Jupyter Classic; switch to JupyterLab via *View → Lab*.
 
 Email notifications are not configured yet.
 
-### When you are done
+**When you are done** — close the tunnel with `Ctrl+C` and switch FoxyProxy
+off again.
 
-Close the tunnel with `Ctrl+C` and switch FoxyProxy off again.
-
-> This whole chapter goes away once the portal gets an address that works over
-> the VPN. You will simply type an address in your browser, with no tunnel and
-> no extension.
+> The tunnel and proxy go away once the portal gets an address that works over
+> the VPN. You will simply type an address in your browser.
 
 ---
 
 ## 6. Lost access?
 
-New laptop, or lost your key? Just run the setup script again on the new
-machine — you will need your password for that.
+**New laptop, old one still in use.** Run the setup script on the new machine.
+A second key is added; the one from your old laptop keeps working. You need the
+password from the mail for this.
 
-Lost your password as well: contact the HPC team. Your identity is verified
-through your KdG school account.
+**Key lost or laptop stolen.** Run the script on your new machine, then remove
+the old key from the server — otherwise whoever has that laptop keeps access.
+Log in and open the file:
+
+```bash
+ssh kdg-compute
+nano ~/.ssh/authorized_keys
+```
+
+Each line is one key, ending in a name such as `your_username@OLD-LAPTOP`.
+Delete the line for the machine you lost, then save with `Ctrl+O`, `Ctrl+X`.
+
+**Password lost too.** Contact the HPC team at
+[compute@kdg.be](mailto:compute@kdg.be). Your identity is verified through your
+KdG school account.
 
 ---
 
@@ -219,16 +308,19 @@ server did with it.
 |---|---|
 | `compute.kdg.be is niet bereikbaar` | The VPN is off, or still connecting |
 | `ssh.exe is niet gevonden` (Windows) | Run `Add-WindowsCapability -Online -Name OpenSSH.Client~~~~0.0.1.0` in PowerShell **as administrator** |
-| `Permission denied` at the password prompt | Wrong account name or one-time password — get in touch |
+| `Permission denied` at the password prompt | Wrong account name or password — get in touch |
 | `Permission denied (publickey)` | Your key is not on the server. Run step 2 again |
 | `WARNING: UNPROTECTED PRIVATE KEY FILE` | Your private key is readable by others: `chmod 600 ~/.ssh/id_ed25519` |
 | Key ignored, no message at all | `sshd` refuses `~/.ssh` when its permissions are too broad: `chmod 700 ~/.ssh` |
 | `Could not resolve hostname kdg-compute` | You have not run step 2 — use the full address |
 | The test in step 7 fails | Normal if you set a passphrase on your key; test with `ssh kdg-compute` |
-| Portal unreachable while the tunnel is open | FoxyProxy is off, or the name is being resolved locally (see step 5) |
+| Your job sits at `PD` in `squeue` | The cluster is busy, or you asked for more than exists. `sinfo` shows what is free |
+| Portal unreachable while the tunnel is open | FoxyProxy is off, or the name is being resolved locally (see 5.3) |
 
-Still stuck? Open an issue and include the **full output** of the script — it
-contains no secrets.
+Still stuck? Open an
+[issue](https://github.com/KdG-OCDI/hpc-public/issues) or mail
+[compute@kdg.be](mailto:compute@kdg.be), with the **full output** of the script
+— it contains no secrets.
 
 ---
 
