@@ -213,6 +213,31 @@ something before you submit it as a job.
 **Leave with `exit` as soon as you are done.** While that shell is open, the
 capacity stays reserved for you, even when you are doing nothing.
 
+### When your time runs out
+
+Your shell is closed and you are back on the login node. Slurm sends a
+`SIGTERM` to everything in your session and a `SIGKILL` thirty seconds later.
+There is no warning beforehand.
+
+What is gone: whatever was in memory — a running script, a Python session, a
+half-finished calculation. What stays: everything written to disk. Your files
+in `/trinity/home` are safe.
+
+How much time you have left:
+
+```bash
+squeue -u $USER -O JobID,TimeLeft,TimeLimit
+```
+
+You cannot extend it: you may only lower your own time limit. Raising it takes
+an administrator.
+
+> Which is why an interactive session is unsuited to long work — you are stuck
+> with the time you guessed in advance. Ask for eight hours to be safe and you
+> end up further back in the queue *and* hold that capacity for as long as your
+> shell is open, lunch included. For real work, [submitting a
+> job](#submitting-a-job) is better.
+
 ---
 
 ## The common mistake
