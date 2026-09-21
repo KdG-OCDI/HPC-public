@@ -216,6 +216,31 @@ te proberen voordat je het als job indient.
 **Sluit af met `exit` zodra je klaar bent.** Zolang die shell openstaat, blijft
 de capaciteit voor jou gereserveerd, ook als je niets doet.
 
+### Als je tijd op is
+
+Je shell wordt afgesloten en je staat weer op de loginnode. Slurm stuurt eerst
+een `SIGTERM` naar alles in je sessie en dertig seconden later een `SIGKILL`.
+Je krijgt geen waarschuwing vooraf.
+
+Wat er weg is: alles wat in het geheugen stond — een draaiend script, een
+Python-sessie, een halve berekening. Wat blijft: alles wat naar schijf is
+geschreven. Je bestanden in `/trinity/home` zijn veilig.
+
+Hoeveel tijd je nog hebt:
+
+```bash
+squeue -u $USER -O JobID,TimeLeft,TimeLimit
+```
+
+Verlengen kan niet: je mag je eigen tijdslimiet alleen verlagen. Alleen een
+beheerder kan hem verhogen.
+
+> Daarom is een interactieve sessie ongeschikt voor werk dat lang duurt — je
+> zit vast aan de tijd die je vooraf gokte. Vraag je voor de zekerheid acht uur
+> aan, dan kom je verder achteraan in de wachtrij én houd je die capaciteit
+> bezet zolang je shell openstaat, ook tijdens je lunch. Voor echt werk is
+> [een job indienen](#een-job-indienen) beter.
+
 ---
 
 ## Veelgemaakte fout
