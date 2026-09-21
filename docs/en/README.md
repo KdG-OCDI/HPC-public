@@ -13,7 +13,7 @@ flowchart TB
     G["login01 · compute.kdg.be<br/><i>where you land</i>"]
     N["node001 … node008<br/><i>where your computing runs</i>"]
     C["controller1<br/><i>scheduler · portal · users<br/>no login for you</i>"]
-    S["/trinity/home/your_username<br/><i>the same directory on every machine</i>"]
+    S["/trinity/home/<br/>jan · els · <b>your_username</b> · …<br/><i>the same disk on every machine</i>"]
 
     L -- ssh --> G
     G -- "sbatch · srun" --> N
