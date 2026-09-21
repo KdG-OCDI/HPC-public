@@ -89,6 +89,28 @@ Vergelijk dat met wat hetzelfde script op de loginnode zei. Een andere machine,
 en vier cores die Slurm voor jou heeft vrijgemaakt — dat is het verschil tussen
 werken op de loginnode en werken op de cluster.
 
+### Je uitvoer bekijken
+
+Drie manieren, en de laatste is veruit de prettigste:
+
+```bash
+cat slurm-4711.out        # als de job klaar is
+tail -f slurm-4711.out    # meelezen terwijl hij draait, stoppen met Ctrl+C
+```
+
+In de VS Code-terminal is de bestandsnaam aanklikbaar: **Ctrl+klik** op
+`slurm-4711.out` opent hem als tabblad. Of gewoon dubbelklikken in de
+bestandsbrowser links.
+
+Maar met **SLURM Cluster Manager** klik je op de job zelf en staat de uitvoer
+er meteen, ook terwijl hij nog draait. Je hoeft het jobnummer niet te
+onthouden en niet te weten in welke map je `sbatch` draaide — en dat is precies
+waar je op dat moment naar zoekt.
+
+> Foutmeldingen komen in hetzelfde bestand terecht, omdat we alleen
+> `--output` hebben opgegeven. Wil je ze apart, voeg dan
+> `#SBATCH --error=slurm-%j.err` toe.
+
 ---
 
 ## Wat je aanvraagt

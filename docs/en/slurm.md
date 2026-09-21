@@ -89,6 +89,28 @@ Compare that with what the same script said on the login node. A different
 machine, and four cores Slurm set aside for you — that is the difference
 between working on the login node and working on the cluster.
 
+### Looking at your output
+
+Three ways, and the last is by far the most pleasant:
+
+```bash
+cat slurm-4711.out        # once the job has finished
+tail -f slurm-4711.out    # follow it while it runs, stop with Ctrl+C
+```
+
+In the VS Code terminal the filename is clickable: **Ctrl+click**
+`slurm-4711.out` to open it as a tab. Or just double-click it in the file
+browser on the left.
+
+But with **SLURM Cluster Manager** you click the job itself and the output is
+right there, including while it is still running. You do not have to remember
+the job number, or which directory you ran `sbatch` in — which is exactly what
+you are looking for at that moment.
+
+> Error messages end up in the same file, because we only specified
+> `--output`. To keep them separate, add
+> `#SBATCH --error=slurm-%j.err`.
+
 ---
 
 ## What you are asking for
