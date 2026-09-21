@@ -2,6 +2,47 @@
 
 *[English version](../en/README.md) · [terug naar de startpagina](../../README.md)*
 
+## De cluster in één oogopslag
+
+Vier soorten machines en één gedeelde map. Wie dit plaatje eenmaal ziet,
+begrijpt de rest van deze pagina een stuk sneller.
+
+```mermaid
+flowchart TB
+    L["jouw laptop<br/><i>campus-wifi of VPN</i>"]
+    G["login01 · compute.kdg.be<br/><i>hier land je</i>"]
+    N["node001 … node008<br/><i>hier draait je rekenwerk</i>"]
+    C["controller1<br/><i>planner · portal · gebruikers<br/>geen login voor jou</i>"]
+    S["/trinity/home/jouw_accountnaam<br/><i>dezelfde map op élke machine</i>"]
+
+    L -- ssh --> G
+    G -- "sbatch · srun" --> N
+    G -.-> C
+    N -.-> C
+    G --- S
+    N --- S
+
+    classDef you fill:#EDF0F4,stroke:#4A5769,color:#131C29
+    classDef login fill:#E3F3EE,stroke:#0F6E5C,color:#0B3F35
+    classDef node fill:#E5ECFA,stroke:#2B57B8,color:#1B3A7A
+    classDef ctrl fill:#FAE7E1,stroke:#A63A22,color:#6E2415
+    classDef store fill:#FBF0DA,stroke:#8A6212,color:#5A3F0B
+    class L you
+    class G login
+    class N node
+    class C ctrl
+    class S store
+```
+
+| Machine | Wat het voor jou betekent |
+|---|---|
+| **login01** | De enige machine waarop je inlogt. Bestanden bewerken, pakketten installeren, git, werk indienen — maar niet rekenen: er is er één en iedereen deelt hem |
+| **node001 … node008** | Waar je rekenwerk draait. Je logt er niet rechtstreeks op in; je dient werk in en Slurm wijst een node toe zodra er plaats is |
+| **controller1** | De machinekamer: de planner, het gebruikersbeheer, de webportal en de gedeelde schijf. Je hebt er geen login, en hebt die ook niet nodig |
+| **/trinity/home/…** | Jouw map, op de loginnode én op elke node dezelfde. Wat je hier opslaat ziet je job ook — kopiëren hoeft niet |
+
+---
+
 Je hebt per mail een accountnaam en een wachtwoord gekregen van het HPC-team.
 Hieronder zet je in ongeveer twee minuten je toegang op.
 
