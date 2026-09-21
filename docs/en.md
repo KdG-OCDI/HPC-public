@@ -10,7 +10,7 @@ up your access in about two minutes.
 | **Login node (SSH)** | `compute.kdg.be` |
 | **Your directory** | `/trinity/home/your_username`, visible on every node |
 | **Scheduler** | Slurm — `sbatch`, `srun`, `squeue` |
-| **Web portal** | Open OnDemand, through a tunnel (see [5.3](#53-a-jupyter-notebook-through-the-portal)) |
+| **Web portal** | Open OnDemand, through a tunnel (see [5.4](#54-a-jupyter-notebook-through-the-portal)) |
 
 ---
 
@@ -138,7 +138,56 @@ attach it to a *Remote Interpreter* or *Deployment*.
 > and is therefore visible on whichever node your job lands. Files you put
 > outside it on one node cannot be seen elsewhere.
 
-### 5.2 Submitting work with Slurm
+### 5.2 Python, packages and git
+
+A handful of modules is available, listed by `module avail`:
+
+| Module | |
+|---|---|
+| `python/3.12`, `python/3.9` | Python; 3.12 is the default |
+| `cmake`, `gnu13`, `hwloc`, `pmix` | build tooling and MPI components |
+| `ood-vnc` | for graphical sessions through the portal |
+
+Load one like this:
+
+```bash
+module load python/3.12
+```
+
+For most projects, though, a per-directory environment is more comfortable.
+[uv](https://docs.astral.sh/uv/) handles the Python version, the virtual
+environment and the packages in one, and needs no module.
+
+Check whether it is already there:
+
+```bash
+which uv
+```
+
+If not, install it once, in your own directory:
+
+```bash
+curl -LsSf https://astral.sh/uv/install.sh | sh
+source ~/.bashrc
+```
+
+Setting up a project:
+
+```bash
+cd /trinity/home/$USER
+mkdir my-project && cd my-project
+uv init
+uv add numpy pandas
+uv run python my_script.py
+```
+
+`git` is available, so you can clone a repository and work inside it.
+
+> **Watch out in a job script.** A job does not inherit your interactive
+> environment. Load your modules again there, and start your code through
+> `uv run`, so the job uses the same packages you do in your terminal.
+
+### 5.3 Submitting work with Slurm
 
 This is the most important thing to know, and the thing that most often goes
 wrong.
@@ -161,7 +210,8 @@ the way of everyone trying to log in at that moment.
 #SBATCH --output=slurm-%j.out
 
 hostname
-python3 my_script.py
+cd /trinity/home/$USER/my-project
+uv run python my_script.py
 ```
 
 Submit and follow it:
@@ -202,7 +252,7 @@ squeue                 # every job in the queue
 > Which software is available and how to set up your environment differs per
 > field. Ask the HPC team at [compute@kdg.be](mailto:compute@kdg.be).
 
-### 5.3 A Jupyter notebook through the portal
+### 5.4 A Jupyter notebook through the portal
 
 Useful if you prefer to work in your browser. This needs a working SSH account,
 so do step 2 first.
@@ -315,7 +365,7 @@ server did with it.
 | `Could not resolve hostname kdg-compute` | You have not run step 2 — use the full address |
 | The test in step 7 fails | Normal if you set a passphrase on your key; test with `ssh kdg-compute` |
 | Your job sits at `PD` in `squeue` | The cluster is busy, or you asked for more than exists. `sinfo` shows what is free |
-| Portal unreachable while the tunnel is open | FoxyProxy is off, or the name is being resolved locally (see 5.3) |
+| Portal unreachable while the tunnel is open | FoxyProxy is off, or the name is being resolved locally (see 5.4) |
 
 Still stuck? Open an
 [issue](https://github.com/KdG-OCDI/hpc-public/issues) or mail
