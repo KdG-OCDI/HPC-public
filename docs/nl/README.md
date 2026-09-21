@@ -7,32 +7,9 @@
 Vier soorten machines en één gedeelde map. Wie dit plaatje eenmaal ziet,
 begrijpt de rest van deze pagina een stuk sneller.
 
-```mermaid
-flowchart TB
-    L["jouw laptop<br/><i>campus-wifi of VPN</i>"]
-    G["login01 · compute.kdg.be<br/><i>hier land je</i>"]
-    N["node001 … node008<br/><i>hier draait je rekenwerk</i>"]
-    C["controller1<br/><i>planner · portal · gebruikers<br/>geen login voor jou</i>"]
-    S["/trinity/home/<br/>jan · els · <b>jouw_accountnaam</b> · …<br/><i>dezelfde schijf op élke machine</i>"]
-
-    L -- ssh --> G
-    G -- "sbatch · srun" --> N
-    G -.-> C
-    N -.-> C
-    G --- S
-    N --- S
-
-    classDef you fill:#EDF0F4,stroke:#4A5769,color:#131C29
-    classDef login fill:#E3F3EE,stroke:#0F6E5C,color:#0B3F35
-    classDef node fill:#E5ECFA,stroke:#2B57B8,color:#1B3A7A
-    classDef ctrl fill:#FAE7E1,stroke:#A63A22,color:#6E2415
-    classDef store fill:#FBF0DA,stroke:#8A6212,color:#5A3F0B
-    class L you
-    class G login
-    class N node
-    class C ctrl
-    class S store
-```
+<p align="center">
+  <img src="../../images/cluster-nl.svg" alt="Schema van de cluster: je laptop verbindt via ssh met login01, die werk indient op node001 tot node008; controller1 plant en beheert alles; /trinity/home is dezelfde gedeelde schijf op alle machines" width="100%">
+</p>
 
 | Machine | Wat het voor jou betekent |
 |---|---|
