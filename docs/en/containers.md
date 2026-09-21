@@ -15,9 +15,10 @@ versioning your data.
 start here lives on the machine you log in to — see
 [how the cluster fits together](README.md#the-cluster-at-a-glance).
 
-**You need access to the docker group.** If you get
+**You are normally in the docker group already.** New accounts are put in it
+automatically. If you still get
 `permission denied while trying to connect to the Docker daemon socket`, your
-account is not in it yet. Send a mail to
+account is not in it — which can happen with older accounts. Send a mail to
 [compute@kdg.be](mailto:compute@kdg.be).
 
 **Containers are not for computing.** They share that one login node with
