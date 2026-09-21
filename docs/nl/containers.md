@@ -15,9 +15,10 @@ versiebeheer van je data.
 start, staat dus op de machine waarop je inlogt — zie
 [hoe de cluster in elkaar zit](README.md#de-cluster-in-één-oogopslag).
 
-**Je hebt toegang nodig tot de docker-groep.** Krijg je
+**Je zit normaal al in de docker-groep.** Nieuwe accounts komen daar
+automatisch in. Krijg je toch
 `permission denied while trying to connect to the Docker daemon socket`, dan zit
-je account er nog niet in. Stuur een mail naar
+je account er nog niet in — dat kan bij oudere accounts. Stuur een mail naar
 [compute@kdg.be](mailto:compute@kdg.be).
 
 **Containers zijn niet om in te rekenen.** Ze delen die ene loginnode met
