@@ -51,7 +51,7 @@ bestand `job.sh` in je projectmap:
 ```bash
 #!/bin/bash
 #SBATCH --job-name=hallo-hpc
-#SBATCH --partition=defg
+#SBATCH --partition=defq
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=4
@@ -177,8 +177,12 @@ realistische schatting werkt het best.
 
 | Partitie | Waarvoor |
 |---|---|
-| `defg` | De hele cluster, gedeeld. Maximaal 8 nodes |
-| `single_node` | Alleen `node001`, om te debuggen |
+| `defq` | De hele cluster, gedeeld. Dit is de standaard, dus je mag `--partition` ook weglaten |
+| `compute` | Ook alle acht de nodes |
+| `node001` … `node008` | Eén specifieke node, om te debuggen |
+
+Welke partities er zijn en of ze vrij zijn, zie je met `sinfo`. De partitie met
+een `*` erachter is de standaard.
 
 ---
 
@@ -203,7 +207,7 @@ Wil je zelf commando's typen op een compute node in plaats van een script in te
 dienen:
 
 ```bash
-srun --partition=defg --cpus-per-task=4 --time=01:00:00 --pty bash
+srun --partition=defq --cpus-per-task=4 --time=01:00:00 --pty bash
 ```
 
 Je krijgt een shell op een compute node zodra er plaats is. Handig om iets uit

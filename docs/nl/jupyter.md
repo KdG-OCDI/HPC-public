@@ -20,7 +20,7 @@ Je vult een formulier in:
 | Veld | Wat je invult |
 |---|---|
 | **Account** | je accountnaam |
-| **Partition** | `defg` voor gewoon werk, `single_node` om te debuggen |
+| **Partition** | `defq` voor gewoon werk, of `node001` om te debuggen |
 | **Number of nodes** | wat je nodig hebt, maximaal 8 |
 
 Klik op **Connect**. Je aanvraag komt in de wachtrij van Slurm terecht: de

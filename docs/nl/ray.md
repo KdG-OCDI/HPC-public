@@ -18,7 +18,7 @@ Wat hier nog moet komen te staan:
 - een "hallo Ray"-voorbeeld dat toont op hoeveel machines je werk draait
 - een jobscript dat de head-node start en de workers daaraan koppelt
 - hoe je script verbinding maakt
-- hoeveel nodes en cores zinvol zijn op `defg`
+- hoeveel nodes en cores zinvol zijn op `defq`
 - wat je moet weten over poorten tussen de nodes
 
 Tot zolang: [Rekenwerk indienen met Slurm](slurm.md) beschrijft hoe je werk in
