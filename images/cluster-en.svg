@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 650" width="1000" height="650" font-family="IBM Plex Sans, Segoe UI, Helvetica, Arial, sans-serif">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 698" width="1000" height="698" font-family="IBM Plex Sans, Segoe UI, Helvetica, Arial, sans-serif">
   <title>The KdG HPC cluster: login01, eight compute nodes, controller1 and the shared storage</title>
 
-  <rect x="0" y="0" width="1000" height="650" rx="14" fill="#F7F9FB"/>
+  <rect x="0" y="0" width="1000" height="698" rx="14" fill="#F7F9FB"/>
 
   <!-- ============ jouw laptop ============ -->
   <rect x="24" y="24" width="660" height="68" rx="10" fill="#FFFFFF" stroke="#CFD7E1"/>
@@ -36,8 +36,8 @@
   <text x="176" y="257" font-size="12" fill="#4A5769">you request capacity, Slurm assigns it</text>
 
   <!-- ============ compute nodes ============ -->
-  <rect x="24" y="270" width="660" height="230" rx="10" fill="#EAEFFA" stroke="#CFD7E1"/>
-  <rect x="24" y="270" width="4" height="230" rx="2" fill="#2B57B8"/>
+  <rect x="24" y="270" width="660" height="278" rx="10" fill="#EAEFFA" stroke="#CFD7E1"/>
+  <rect x="24" y="270" width="4" height="278" rx="2" fill="#2B57B8"/>
   <circle cx="48" cy="290" r="4" fill="#2B57B8"/>
   <text x="60" y="294" font-family="IBM Plex Mono, Consolas, monospace" font-size="10.5" letter-spacing="1.4" fill="#2B57B8">WHERE YOUR COMPUTING RUNS</text>
   <text x="44" y="316" font-family="IBM Plex Mono, Consolas, monospace" font-size="16" font-weight="600" fill="#131C29">eight compute nodes</text>
@@ -63,32 +63,32 @@
   <line x1="44" y1="447" x2="664" y2="447" stroke="#CFD7E1" stroke-dasharray="3 3"/>
   <text x="44" y="465" font-family="IBM Plex Mono, Consolas, monospace" font-size="10.5" letter-spacing="1.3" fill="#4A5769">WHICH QUEUE YOU JOIN</text>
   <g font-size="11.5" fill="#4A5769">
-    <rect x="44" y="474" width="66" height="19" rx="5" fill="#FFFFFF" stroke="#CFD7E1"/>
+    <rect x="44" y="474" width="78" height="19" rx="5" fill="#FFFFFF" stroke="#CFD7E1"/>
     <text x="53" y="488" font-family="IBM Plex Mono, Consolas, monospace" font-size="11" fill="#131C29">defq</text>
-    <text x="118" y="488">all eight, shared — the default</text>
-    <rect x="320" y="474" width="74" height="19" rx="5" fill="#FFFFFF" stroke="#CFD7E1"/>
-    <text x="329" y="488" font-family="IBM Plex Mono, Consolas, monospace" font-size="11" fill="#131C29">compute</text>
-    <text x="402" y="488">all eight as well</text>
-    <rect x="500" y="474" width="74" height="19" rx="5" fill="#FFFFFF" stroke="#CFD7E1"/>
-    <text x="509" y="488" font-family="IBM Plex Mono, Consolas, monospace" font-size="11" fill="#131C29">node003</text>
-    <text x="582" y="488">for debugging</text>
+    <text x="132" y="488">all eight, shared — the default</text>
+    <rect x="44" y="498" width="78" height="19" rx="5" fill="#FFFFFF" stroke="#CFD7E1"/>
+    <text x="53" y="512" font-family="IBM Plex Mono, Consolas, monospace" font-size="11" fill="#131C29">compute</text>
+    <text x="132" y="512">all eight as well</text>
+    <rect x="44" y="522" width="78" height="19" rx="5" fill="#FFFFFF" stroke="#CFD7E1"/>
+    <text x="53" y="536" font-family="IBM Plex Mono, Consolas, monospace" font-size="11" fill="#131C29">node003</text>
+    <text x="132" y="536">for debugging</text>
   </g>
 
-  <line x1="60" y1="500" x2="60" y2="534" stroke="#CFD7E1" stroke-dasharray="4 3"/>
-  <text x="76" y="521" font-size="12" fill="#4A5769">schedules, manages and serves all of this</text>
+  <line x1="60" y1="548" x2="60" y2="582" stroke="#CFD7E1" stroke-dasharray="4 3"/>
+  <text x="76" y="569" font-size="12" fill="#4A5769">schedules, manages and serves all of this</text>
 
   <!-- ============ controller1 ============ -->
-  <rect x="24" y="534" width="660" height="92" rx="10" fill="#FAEDE9" stroke="#CFD7E1"/>
-  <rect x="24" y="534" width="4" height="92" rx="2" fill="#A63A22"/>
-  <circle cx="48" cy="554" r="4" fill="#A63A22"/>
-  <text x="60" y="558" font-family="IBM Plex Mono, Consolas, monospace" font-size="10.5" letter-spacing="1.4" fill="#A63A22">NOT YOURS TO USE</text>
-  <text x="44" y="580" font-family="IBM Plex Mono, Consolas, monospace" font-size="16" font-weight="600" fill="#131C29">controller1</text>
-  <text x="44" y="598" font-size="12.5" fill="#4A5769">The cluster's engine room. You have no login there, and do not need one.</text>
-  <text x="44" y="616" font-size="12" fill="#4A5769">· the Slurm scheduler   · users and passwords   · the web portal   · the shared storage</text>
+  <rect x="24" y="582" width="660" height="92" rx="10" fill="#FAEDE9" stroke="#CFD7E1"/>
+  <rect x="24" y="582" width="4" height="92" rx="2" fill="#A63A22"/>
+  <circle cx="48" cy="602" r="4" fill="#A63A22"/>
+  <text x="60" y="606" font-family="IBM Plex Mono, Consolas, monospace" font-size="10.5" letter-spacing="1.4" fill="#A63A22">NOT YOURS TO USE</text>
+  <text x="44" y="628" font-family="IBM Plex Mono, Consolas, monospace" font-size="16" font-weight="600" fill="#131C29">controller1</text>
+  <text x="44" y="646" font-size="12.5" fill="#4A5769">The cluster's engine room. You have no login there, and do not need one.</text>
+  <text x="44" y="664" font-size="12" fill="#4A5769">· the Slurm scheduler   · users and passwords   · the web portal   · the shared storage</text>
 
   <!-- ============ gedeelde schijf ============ -->
-  <rect x="700" y="126" width="276" height="500" rx="10" fill="#FBF3E2" stroke="#CFD7E1"/>
-  <rect x="700" y="126" width="4" height="500" rx="2" fill="#8A6212"/>
+  <rect x="700" y="126" width="276" height="548" rx="10" fill="#FBF3E2" stroke="#CFD7E1"/>
+  <rect x="700" y="126" width="4" height="548" rx="2" fill="#8A6212"/>
   <circle cx="724" cy="146" r="4" fill="#8A6212"/>
   <text x="736" y="150" font-family="IBM Plex Mono, Consolas, monospace" font-size="10.5" letter-spacing="1.4" fill="#8A6212">SHARED STORAGE</text>
 
@@ -98,7 +98,7 @@
     <text x="718" y="206">on every compute node.</text>
   </g>
 
-  <rect x="777" y="336" width="126" height="19" rx="5" fill="#F3E3BE" stroke="#8A6212"/>
+  <rect x="712" y="337" width="248" height="19" rx="5" fill="#F3E3BE" stroke="#8A6212"/>
   <g font-family="IBM Plex Mono, Consolas, monospace" font-size="12" fill="#4A5769" xml:space="preserve">
     <text x="718" y="236" fill="#131C29" font-weight="600">/</text>
     <text x="718" y="252">├─ bin  etc  usr  var</text>
@@ -110,6 +110,7 @@
     <text x="718" y="350">      ├─ <tspan fill="#131C29" font-weight="600">your_username</tspan></text>
     <text x="718" y="366">      ├─ soufiane</text>
     <text x="718" y="382">      └─ …</text>
+    <text x="952" y="350" text-anchor="end" font-size="10.5" letter-spacing="1.2" fill="#8A6212">YOU</text>
   </g>
 
   <g font-size="12" fill="#4A5769">
@@ -121,12 +122,12 @@
     <text x="718" y="494">be found on another.</text>
   </g>
 
-  <line x1="718" y1="516" x2="958" y2="516" stroke="#CFD7E1" stroke-dasharray="3 3"/>
+  <line x1="718" y1="576" x2="958" y2="576" stroke="#CFD7E1" stroke-dasharray="3 3"/>
 
   <g font-size="12" fill="#4A5769">
-    <text x="718" y="538"><tspan font-weight="600" fill="#131C29">So</tspan> there is nothing to copy:</text>
-    <text x="718" y="554">the file you edit in VS Code is</text>
-    <text x="718" y="570">exactly the file your job opens</text>
-    <text x="718" y="586">on node005.</text>
+    <text x="718" y="598"><tspan font-weight="600" fill="#131C29">So</tspan> there is nothing to copy:</text>
+    <text x="718" y="614">the file you edit in VS Code is</text>
+    <text x="718" y="630">exactly the file your job opens</text>
+    <text x="718" y="646">on node005.</text>
   </g>
 </svg>
