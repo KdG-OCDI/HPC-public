@@ -9,31 +9,24 @@ distributes it across the compute nodes.
 
 ## Useful tooling
 
-Two things that make working with Slurm considerably more pleasant. Neither is
-required — everything works with `sbatch` and `squeue` — but they save a lot of
-going back and forth in the terminal.
+Two VS Code extensions make working with Slurm considerably more pleasant.
+Neither is required — everything works with `sbatch` and `squeue` — but they
+save a lot of going back and forth in the terminal.
 
-**[sCode](https://github.com/dhimitriosduka1/sCode)** brings Slurm into VS
-Code. Your running and pending jobs appear in the sidebar, showing how much of
-your requested time is used up; you open log files with one click, and cancel
-or hold jobs without typing a command. It also shows GPU usage per partition
-and per user.
+Search for them by name in the *Extensions* panel:
 
-Install it from the VS Code Marketplace. Note that the extension has to run on
-a machine that knows Slurm, so install it **in your Remote-SSH window**, not
-locally — see [Working in your own editor](editor.md).
+| Extension | What it gives you |
+|---|---|
+| **SLURM Cluster Manager** | Your jobs in the sidebar, showing how much of your requested time is used up. Log files with one click, cancelling jobs without a command, and GPU usage per partition |
+| **SLURM Monitor** | A view of the whole cluster: which nodes are free, and what a job actually uses against what it requested |
 
-**[slurm-monitor-top](https://github.com/hforoughmand/slurm-monitor-top)** is an
-`htop` for the cluster: one terminal screen with every job, which nodes are
-free, what a job actually uses against what it requested, and your job output
-streaming live. It refreshes every three seconds.
+> **Install them in your Remote-SSH window**, not locally. They need the Slurm
+> commands, and those live on the cluster — see
+> [Working in your own editor](editor.md).
 
-```bash
-uv tool install slurm-monitor-top
-slurm-top
-```
-
-Both are third-party tools and are not maintained by the HPC team.
+Both are third-party and are not maintained by the HPC team:
+[SLURM Cluster Manager](https://github.com/dhimitriosduka1/sCode),
+[SLURM Monitor](https://github.com/hforoughmand/slurm-monitor-top).
 
 ---
 
