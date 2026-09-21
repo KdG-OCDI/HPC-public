@@ -1,7 +1,7 @@
 # SSH access by hand
 
 **Most people do not need this page.** The setup script in
-[docs/en.md](docs/en.md#2-run-one-command) does everything
+[docs/en/README.md](docs/en/README.md#2-run-one-command) does everything
 below in about two minutes, and it is idempotent, so running it again is safe.
 
 Read on if you want to understand what it does, if you prefer to do it
