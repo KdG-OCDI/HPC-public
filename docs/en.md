@@ -10,7 +10,7 @@ up your access in about two minutes.
 | **Login node (SSH)** | `compute.kdg.be` |
 | **Your directory** | `/trinity/home/your_username`, visible on every node |
 | **Scheduler** | Slurm — `sbatch`, `srun`, `squeue` |
-| **Web portal** | Open OnDemand, through a tunnel (see [5.4](#54-a-jupyter-notebook-through-the-portal)) |
+| **Web portal** | Open OnDemand, through a tunnel (see [5.1](#51-a-jupyter-notebook-through-the-portal)) |
 
 ---
 
@@ -110,152 +110,18 @@ ssh kdg-compute passwd
 
 ## 5. Working on the cluster
 
-There are two ways, and most people use the first.
+Four ways, from simple to more advanced. Start with whatever you need: a
+notebook in your browser, your own editor on the cluster, a per-project
+environment, or work you put in the queue.
 
-### 5.1 With VS Code, Cursor or PyCharm
+### 5.1 A Jupyter notebook through the portal
 
-You edit files on the cluster as if they were local, with your own editor,
-extensions and shortcuts. Your terminal runs on the cluster.
+The simplest way in: a notebook in your browser, with no terminal knowledge
+required. You do need a working SSH account, so do step 2 first.
 
-**VS Code or Cursor**
-
-1. Install the
-   [Remote - SSH](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-ssh)
-   extension.
-2. `Ctrl+Shift+P` → *Remote-SSH: Connect to Host...* → `kdg-compute`.
-3. A new window opens. The bottom left says **SSH: kdg-compute**.
-4. *File → Open Folder* → your own directory, for example
-   `/trinity/home/your_username`.
-5. *Terminal → New Terminal* gives you a shell on the login node.
-
-The first time, VS Code installs a small helper on the server. That takes a
-moment and does not happen again.
-
-**PyCharm** — *Settings → Tools → SSH Configurations* → `kdg-compute`, then
-attach it to a *Remote Interpreter* or *Deployment*.
-
-> Work in your own directory under `/trinity/home/`. It lives on shared storage
-> and is therefore visible on whichever node your job lands. Files you put
-> outside it on one node cannot be seen elsewhere.
-
-### 5.2 Python, packages and git
-
-A handful of modules is available, listed by `module avail`:
-
-| Module | |
-|---|---|
-| `python/3.12`, `python/3.9` | Python; 3.12 is the default |
-| `cmake`, `gnu13`, `hwloc`, `pmix` | build tooling and MPI components |
-| `ood-vnc` | for graphical sessions through the portal |
-
-Load one like this:
-
-```bash
-module load python/3.12
-```
-
-For most projects, though, a per-directory environment is more comfortable.
-[uv](https://docs.astral.sh/uv/) handles the Python version, the virtual
-environment and the packages in one, and needs no module.
-
-Check whether it is already there:
-
-```bash
-which uv
-```
-
-If not, install it once, in your own directory:
-
-```bash
-curl -LsSf https://astral.sh/uv/install.sh | sh
-source ~/.bashrc
-```
-
-Setting up a project:
-
-```bash
-cd /trinity/home/$USER
-mkdir my-project && cd my-project
-uv init
-uv add numpy pandas
-uv run python my_script.py
-```
-
-`git` is available, so you can clone a repository and work inside it.
-
-> **Watch out in a job script.** A job does not inherit your interactive
-> environment. Load your modules again there, and start your code through
-> `uv run`, so the job uses the same packages you do in your terminal.
-
-### 5.3 Submitting work with Slurm
-
-This is the most important thing to know, and the thing that most often goes
-wrong.
-
-**The login node is not for computing.** There you edit files, install things
-and submit work. The actual computing goes to the compute nodes, and Slurm
-distributes it. Run a heavy script directly on the login node and you get in
-the way of everyone trying to log in at that moment.
-
-**Submitting a job.** Create a file `job.sh`:
-
-```bash
-#!/bin/bash
-#SBATCH --job-name=my-first-job
-#SBATCH --partition=defg
-#SBATCH --nodes=1
-#SBATCH --ntasks=1
-#SBATCH --cpus-per-task=4
-#SBATCH --time=01:00:00
-#SBATCH --output=slurm-%j.out
-
-hostname
-cd /trinity/home/$USER/my-project
-uv run python my_script.py
-```
-
-Submit and follow it:
-
-```bash
-sbatch job.sh          # submits the job, prints the job number
-squeue -u $USER        # shows your own jobs and their state
-scancel <jobnumber>    # stops a job
-```
-
-The output ends up in `slurm-<jobnumber>.out`, in the directory where you ran
-`sbatch`.
-
-**Partitions.** `--partition` decides where your job runs:
-
-| Partition | For |
-|---|---|
-| `defg` | The whole cluster, shared. Up to 8 nodes |
-| `single_node` | `node001` only, for debugging |
-
-**Working interactively.** To type commands on a compute node yourself instead
-of submitting a script:
-
-```bash
-srun --partition=defg --cpus-per-task=4 --time=01:00:00 --pty bash
-```
-
-That gives you a shell on a compute node. Leave with `exit` as soon as you are
-done — while that shell is open, the capacity stays reserved for you.
-
-**What is running:**
-
-```bash
-sinfo                  # which nodes exist and whether they are free
-squeue                 # every job in the queue
-```
-
-> Which software is available and how to set up your environment differs per
-> field. Ask the HPC team at [compute@kdg.be](mailto:compute@kdg.be).
-
-### 5.4 A Jupyter notebook through the portal
-
-Useful if you prefer to work in your browser. This needs a working SSH account,
-so do step 2 first.
+Setting it up currently takes more effort than using it, because of the tunnel
+below. If you would rather work in your own editor, skip this and go to
+[5.2](#52-with-vs-code-cursor-or-pycharm).
 
 The portal runs on an address that only exists inside the cluster network. Your
 browser cannot resolve that name, not even on the VPN. So you send your browser
@@ -323,6 +189,146 @@ off again.
 > The tunnel and proxy go away once the portal gets an address that works over
 > the VPN. You will simply type an address in your browser.
 
+### 5.2 With VS Code, Cursor or PyCharm
+
+You edit files on the cluster as if they were local, with your own editor,
+extensions and shortcuts. Your terminal runs on the cluster.
+
+**VS Code or Cursor**
+
+1. Install the
+   [Remote - SSH](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-ssh)
+   extension.
+2. `Ctrl+Shift+P` → *Remote-SSH: Connect to Host...* → `kdg-compute`.
+3. A new window opens. The bottom left says **SSH: kdg-compute**.
+4. *File → Open Folder* → your own directory, for example
+   `/trinity/home/your_username`.
+5. *Terminal → New Terminal* gives you a shell on the login node.
+
+The first time, VS Code installs a small helper on the server. That takes a
+moment and does not happen again.
+
+**PyCharm** — *Settings → Tools → SSH Configurations* → `kdg-compute`, then
+attach it to a *Remote Interpreter* or *Deployment*.
+
+> Work in your own directory under `/trinity/home/`. It lives on shared storage
+> and is therefore visible on whichever node your job lands. Files you put
+> outside it on one node cannot be seen elsewhere.
+
+### 5.3 Python, packages and git
+
+A handful of modules is available, listed by `module avail`:
+
+| Module | |
+|---|---|
+| `python/3.12`, `python/3.9` | Python; 3.12 is the default |
+| `cmake`, `gnu13`, `hwloc`, `pmix` | build tooling and MPI components |
+| `ood-vnc` | for graphical sessions through the portal |
+
+Load one like this:
+
+```bash
+module load python/3.12
+```
+
+For most projects, though, a per-directory environment is more comfortable.
+[uv](https://docs.astral.sh/uv/) handles the Python version, the virtual
+environment and the packages in one, and needs no module.
+
+Check whether it is already there:
+
+```bash
+which uv
+```
+
+If not, install it once, in your own directory:
+
+```bash
+curl -LsSf https://astral.sh/uv/install.sh | sh
+source ~/.bashrc
+```
+
+Setting up a project:
+
+```bash
+cd /trinity/home/$USER
+mkdir my-project && cd my-project
+uv init
+uv add numpy pandas
+uv run python my_script.py
+```
+
+`git` is available, so you can clone a repository and work inside it.
+
+> **Watch out in a job script.** A job does not inherit your interactive
+> environment. Load your modules again there, and start your code through
+> `uv run`, so the job uses the same packages you do in your terminal.
+
+### 5.4 Submitting work with Slurm
+
+This is the most important thing to know, and the thing that most often goes
+wrong.
+
+**The login node is not for computing.** There you edit files, install things
+and submit work. The actual computing goes to the compute nodes, and Slurm
+distributes it. Run a heavy script directly on the login node and you get in
+the way of everyone trying to log in at that moment.
+
+**Submitting a job.** Create a file `job.sh`:
+
+```bash
+#!/bin/bash
+#SBATCH --job-name=my-first-job
+#SBATCH --partition=defg
+#SBATCH --nodes=1
+#SBATCH --ntasks=1
+#SBATCH --cpus-per-task=4
+#SBATCH --time=01:00:00
+#SBATCH --output=slurm-%j.out
+
+hostname
+cd /trinity/home/$USER/my-project
+uv run python my_script.py
+```
+
+Submit and follow it:
+
+```bash
+sbatch job.sh          # submits the job, prints the job number
+squeue -u $USER        # shows your own jobs and their state
+scancel <jobnumber>    # stops a job
+```
+
+The output ends up in `slurm-<jobnumber>.out`, in the directory where you ran
+`sbatch`.
+
+**Partitions.** `--partition` decides where your job runs:
+
+| Partition | For |
+|---|---|
+| `defg` | The whole cluster, shared. Up to 8 nodes |
+| `single_node` | `node001` only, for debugging |
+
+**Working interactively.** To type commands on a compute node yourself instead
+of submitting a script:
+
+```bash
+srun --partition=defg --cpus-per-task=4 --time=01:00:00 --pty bash
+```
+
+That gives you a shell on a compute node. Leave with `exit` as soon as you are
+done — while that shell is open, the capacity stays reserved for you.
+
+**What is running:**
+
+```bash
+sinfo                  # which nodes exist and whether they are free
+squeue                 # every job in the queue
+```
+
+> Which software is available and how to set up your environment differs per
+> field. Ask the HPC team at [compute@kdg.be](mailto:compute@kdg.be).
+
 ---
 
 ## 6. Lost access?
@@ -365,7 +371,7 @@ server did with it.
 | `Could not resolve hostname kdg-compute` | You have not run step 2 — use the full address |
 | The test in step 7 fails | Normal if you set a passphrase on your key; test with `ssh kdg-compute` |
 | Your job sits at `PD` in `squeue` | The cluster is busy, or you asked for more than exists. `sinfo` shows what is free |
-| Portal unreachable while the tunnel is open | FoxyProxy is off, or the name is being resolved locally (see 5.4) |
+| Portal unreachable while the tunnel is open | FoxyProxy is off, or the name is being resolved locally (see 5.1) |
 
 Still stuck? Open an
 [issue](https://github.com/KdG-OCDI/hpc-public/issues) or mail
