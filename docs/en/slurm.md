@@ -21,21 +21,22 @@ directly: you request capacity, and Slurm gives it to you once it is free.
 
 ## Submitting a job
 
-Create a file `job.sh` in your project directory:
+We use the same `hello.py` from
+[Python, packages and git](python.md#your-first-script). Alongside it, create a
+file `job.sh` in your project directory:
 
 ```bash
 #!/bin/bash
-#SBATCH --job-name=my-first-job
+#SBATCH --job-name=hello-hpc
 #SBATCH --partition=defg
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=4
-#SBATCH --time=01:00:00
+#SBATCH --time=00:05:00
 #SBATCH --output=slurm-%j.out
 
-hostname
 cd /trinity/home/$USER/my-project
-uv run python my_script.py
+uv run python hello.py
 ```
 
 The `#SBATCH` lines are not comments: they are your request. Below them are
@@ -47,8 +48,23 @@ Submit it:
 sbatch job.sh
 ```
 
-You get a job number back. The output lands in `slurm-<jobnumber>.out`, in the
-directory where you ran `sbatch`.
+You get a job number back, for instance `Submitted batch job 4711`. The output
+lands in `slurm-4711.out`, in the directory where you ran `sbatch`:
+
+```bash
+cat slurm-4711.out
+```
+
+```
+Hello HPC, from node003
+Python 3.12.3, NumPy 2.1.1
+Cores on this machine: 128
+Running as job 4711, with 4 cores assigned
+```
+
+Compare that with what the same script said on the login node. A different
+machine, and four cores Slurm set aside for you — that is the difference
+between working on the login node and working on the cluster.
 
 ---
 

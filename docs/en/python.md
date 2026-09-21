@@ -57,20 +57,52 @@ look broken.
 In **PyCharm**, open the project the same way and point the interpreter at the
 `.venv`.
 
-### Running your code
+### Your first script
+
+Create `hello.py` in your project directory:
+
+```python
+import os
+import platform
+import socket
+
+import numpy as np
+
+print(f"Hello HPC, from {socket.gethostname()}")
+print(f"Python {platform.python_version()}, NumPy {np.__version__}")
+print(f"Cores on this machine: {os.cpu_count()}")
+
+job = os.environ.get("SLURM_JOB_ID")
+if job:
+    cores = os.environ.get("SLURM_CPUS_PER_TASK", "?")
+    print(f"Running as job {job}, with {cores} cores assigned")
+else:
+    print("Not running as a job — you are on the login node")
+```
+
+Run it:
 
 ```bash
-uv run python my_script.py
+uv run python hello.py
 ```
 
 `uv run` makes sure your script uses this project's packages, without you
-having to activate an environment.
+having to activate an environment. You should see something like:
+
+```
+Hello HPC, from login01
+Python 3.12.3, NumPy 2.1.1
+Cores on this machine: 64
+Not running as a job — you are on the login node
+```
+
+That last line is the point of this example.
 
 > **Mind where this runs.** Your terminal is on the login node, so this command
 > runs there too. Fine for checking that your script starts, or trying
 > something small, but not for real computing: that one machine belongs to
 > everyone. As soon as it takes more than a few seconds, submit it as a
-> [job](slurm.md).
+> [job](slurm.md) — where the same script says something different.
 
 A different Python version for this project:
 

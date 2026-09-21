@@ -15,6 +15,7 @@ that. When your job ends, the Ray cluster disappears with it.
 What still needs to go here:
 
 - whether Ray is available or you add it yourself with `uv add ray`
+- a "hello Ray" example that shows how many machines your work runs on
 - a job script that starts the head node and attaches the workers to it
 - how your script connects
 - how many nodes and cores make sense on `defg`

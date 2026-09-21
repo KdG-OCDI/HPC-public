@@ -21,21 +21,22 @@ op: je vraagt capaciteit aan, en Slurm geeft je die zodra ze vrij is.
 
 ## Een job indienen
 
-Maak een bestand `job.sh` in je projectmap:
+We gebruiken hier hetzelfde `hello.py` uit
+[Python, pakketten en git](python.md#je-eerste-script). Maak daarnaast een
+bestand `job.sh` in je projectmap:
 
 ```bash
 #!/bin/bash
-#SBATCH --job-name=mijn-eerste-job
+#SBATCH --job-name=hallo-hpc
 #SBATCH --partition=defg
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=4
-#SBATCH --time=01:00:00
+#SBATCH --time=00:05:00
 #SBATCH --output=slurm-%j.out
 
-hostname
 cd /trinity/home/$USER/mijn-project
-uv run python mijn_script.py
+uv run python hello.py
 ```
 
 De regels met `#SBATCH` zijn geen commentaar: dat zijn je aanvraag. Daaronder
@@ -47,8 +48,23 @@ Indienen:
 sbatch job.sh
 ```
 
-Je krijgt een jobnummer terug. De uitvoer komt in `slurm-<jobnummer>.out`, in
-de map waar je `sbatch` draaide.
+Je krijgt een jobnummer terug, bijvoorbeeld `Submitted batch job 4711`. De
+uitvoer komt in `slurm-4711.out`, in de map waar je `sbatch` draaide:
+
+```bash
+cat slurm-4711.out
+```
+
+```
+Hallo HPC, vanaf node003
+Python 3.12.3, NumPy 2.1.1
+Cores op deze machine: 128
+Dit draait als job 4711, met 4 toegewezen cores
+```
+
+Vergelijk dat met wat hetzelfde script op de loginnode zei. Een andere machine,
+en vier cores die Slurm voor jou heeft vrijgemaakt — dat is het verschil tussen
+werken op de loginnode en werken op de cluster.
 
 ---
 
