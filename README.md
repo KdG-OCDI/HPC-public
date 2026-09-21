@@ -100,6 +100,13 @@ SOCKS v5 tunnel over the login node. **This requires a working SSH account**
 
    Any port above 1024 works instead of 9090.
 
+   `kdg-compute` is the alias the setup script wrote into your `~/.ssh/config`,
+   not a hostname. Without it, use your account and the real address:
+
+   ```bash
+   ssh -N -D 9090 your_username@compute.kdg.be
+   ```
+
 2. Point your browser at the SOCKS proxy `localhost:9090`.
    Use the [FoxyProxy](https://addons.mozilla.org/en-US/firefox/addon/foxyproxy-standard/)
    extension rather than your system proxy settings (see below).
