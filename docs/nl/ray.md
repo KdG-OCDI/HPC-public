@@ -15,6 +15,7 @@ je job klaar is, verdwijnt die Ray-cluster weer.
 Wat hier nog moet komen te staan:
 
 - of Ray klaarstaat of je het zelf toevoegt met `uv add ray`
+- een "hallo Ray"-voorbeeld dat toont op hoeveel machines je werk draait
 - een jobscript dat de head-node start en de workers daaraan koppelt
 - hoe je script verbinding maakt
 - hoeveel nodes en cores zinvol zijn op `defg`
