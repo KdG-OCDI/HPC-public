@@ -197,7 +197,7 @@ Sluit de tunnel met `Ctrl+C` en zet FoxyProxy weer uit.
 
 ## 6. Werken met de cluster
 
-Vijf manieren, van eenvoudig naar geavanceerder. Elke pagina staat op zichzelf;
+Zes manieren, van eenvoudig naar geavanceerder. Elke pagina staat op zichzelf;
 begin bij wat je nodig hebt.
 
 | | Waarvoor | Wat je nodig hebt |
@@ -207,6 +207,7 @@ begin bij wat je nodig hebt.
 | **[Python, pakketten en git](python.md)** | Een omgeving per project opzetten | De terminal |
 | **[Rekenwerk indienen met Slurm](slurm.md)** | Werk dat te zwaar is voor de loginnode | Begrip van een wachtrij |
 | **[Verdeeld rekenen met Ray](ray.md)** | Werk over meerdere machines tegelijk | Slurm, en Ray *(in de maak)* |
+| **[Diensten draaien in containers](containers.md)** | MLflow, Postgres, MinIO, LakeFS — naast je rekenwerk | Docker op de loginnode |
 
 Weet je niet waar te beginnen: [je eigen editor](editor.md) is wat de meeste
 mensen hier dagelijks gebruiken.
