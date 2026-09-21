@@ -14,7 +14,7 @@ for students, staff and researchers.
 
 ### Nederlands
 
-**[Toegang tot de cluster &rarr;](docs/nl.md)**
+**[Toegang tot de cluster &rarr;](docs/nl/README.md)**
 
 Van je eerste aanmelding tot werken vanuit VS Code, met één commando.
 Inclusief de webportal en het oplossen van problemen.
@@ -24,7 +24,7 @@ Inclusief de webportal en het oplossen van problemen.
 
 ### English
 
-**[Access to the cluster &rarr;](docs/en.md)**
+**[Access to the cluster &rarr;](docs/en/README.md)**
 
 From your first login to working from VS Code, with a single command.
 Includes the web portal and troubleshooting.
@@ -57,8 +57,8 @@ not have them yet, get in touch.
 
 | | |
 |---|---|
-| [`docs/nl.md`](docs/nl.md) | De volledige procedure, in het Nederlands |
-| [`docs/en.md`](docs/en.md) | The same procedure, in English |
+| [`docs/nl/`](docs/nl/README.md) | De volledige procedure, in het Nederlands |
+| [`docs/en/`](docs/en/README.md) | The same procedure, in English |
 | [`Setup SSH.md`](Setup%20SSH.md) | Handmatige SSH-installatie · Manual SSH setup (EN) |
 | [`tools/`](tools) | De setupscripts · The setup scripts |
 

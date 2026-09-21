@@ -1,6 +1,6 @@
 # Toegang tot de KdG HPC-cluster
 
-*[English version](en.md) · [terug naar de startpagina](../README.md)*
+*[English version](../en/README.md) · [terug naar de startpagina](../../README.md)*
 
 Je hebt per mail een accountnaam en een wachtwoord gekregen van het HPC-team.
 Hieronder zet je in ongeveer twee minuten je toegang op.
@@ -10,7 +10,7 @@ Hieronder zet je in ongeveer twee minuten je toegang op.
 | **Loginnode (SSH)** | `compute.kdg.be` |
 | **Je map op de cluster** | `/trinity/home/jouw_accountnaam`, zichtbaar op alle nodes |
 | **Planner** | Slurm — `sbatch`, `srun`, `squeue` |
-| **Webportal** | Open OnDemand, via een tunnel (zie [5.1](#51-een-jupyter-notebook-via-de-portal)) |
+| **Webportal** | Open OnDemand, via een tunnel (zie [stap 5](#5-toegang-tot-de-webportal)) |
 
 ---
 
@@ -109,27 +109,17 @@ ssh kdg-compute passwd
 
 ---
 
-## 5. Werken op de cluster
+## 5. Toegang tot de webportal
 
-Vier manieren, van eenvoudig naar geavanceerder. Begin bij wat je nodig hebt:
-een notebook in je browser, je eigen editor op de cluster, een omgeving per
-project, of werk dat je in de wachtrij zet.
-
-### 5.1 Een Jupyter-notebook via de portal
-
-De eenvoudigste manier om te beginnen: een notebook in je browser, zonder dat
-je iets van de terminal hoeft te weten. Je hebt wel een werkend SSH-account
-nodig, dus doe eerst stap 2.
-
-Het opzetten kost momenteel meer moeite dan het gebruiken, door de tunnel
-hieronder. Werk je liever in je eigen editor, sla dit dan over en ga naar
-[5.2](#52-met-vs-code-cursor-of-pycharm).
+Alleen nodig als je de portal wil gebruiken, bijvoorbeeld voor een
+[Jupyter-notebook in je browser](jupyter.md). Werk je liever in je eigen
+editor, dan kun je dit hoofdstuk overslaan.
 
 De portal draait op een adres dat alleen binnen het clusternetwerk bestaat. Je
 browser kan die naam niet vinden, ook niet met VPN. Daarom stuur je je
 browserverkeer door een tunnel die de naam aan de clusterkant laat opzoeken.
 
-**Stap 1 — open de tunnel**
+### Stap 1 — open de tunnel
 
 ```bash
 ssh -N -D 9090 kdg-compute
@@ -139,7 +129,7 @@ Dit commando blokkeert en geeft geen uitvoer. Dat hoort zo: laat het venster
 open zolang je de portal gebruikt. Elk poortnummer boven 1024 mag in plaats van
 9090.
 
-**Stap 2 — stuur je browser door de tunnel**
+### Stap 2 — stuur je browser door de tunnel
 
 Gebruik hiervoor [FoxyProxy](https://addons.mozilla.org/nl/firefox/addon/foxyproxy-standard/),
 beschikbaar voor Firefox, Chrome en Edge. Het kan ook via de instellingen van
@@ -150,7 +140,7 @@ clusteradres.
 Maak een proxy aan van het type **SOCKS5**, met host `localhost` en poort
 `9090`:
 
-![FoxyProxy-instellingen](../images/foxyproxy.png)
+![FoxyProxy-instellingen](../../images/foxyproxy.png)
 
 Voeg daarna een regel toe van het type *wildcard* met dit patroon, en kies
 **Proxy by Patterns**:
@@ -159,7 +149,7 @@ Voeg daarna een regel toe van het type *wildcard* met dit patroon, en kies
 ://controller1.cluster:*
 ```
 
-![FoxyProxy-patronen](../images/foxyproxy_patterns.png)
+![FoxyProxy-patronen](../../images/foxyproxy_patterns.png)
 
 > **Belangrijk bij SOCKS5:** de naam `controller1.cluster` moet aan de
 > clusterkant opgezocht worden, niet op je laptop. In Firefox is dat het
@@ -167,174 +157,45 @@ Voeg daarna een regel toe van het type *wildcard* met dit patroon, en kies
 > Doe je het via je systeeminstellingen, dan werkt het vaak niet om precies
 > deze reden.
 
-**Stap 3 — open de portal**
+### Stap 3 — open de portal
 
 Ga naar [https://controller1.cluster:8080](https://controller1.cluster:8080) en
 klik op **Azure SSO Login** om met je schoolaccount aan te melden.
 
-![Aanmeldpagina](../images/login_page.png)
+![Aanmeldpagina](../../images/login_page.png)
 
-**Stap 4 — start een notebook**
+Je bent nu binnen. Wat je er kunt doen staat in
+[Een Jupyter-notebook via de portal](jupyter.md).
 
-Klik op de startpagina op **Jupyter notebook** onder *Interactive Apps*.
+### Als je klaar bent
 
-- Vul je accountnaam in.
-- Kies een partitie: `defg` voor gewoon werk, `single_node` om te debuggen.
-- Kies het aantal nodes dat je nodig hebt, maximaal 8.
-- Klik **Connect**. Je komt in je eigen map terecht.
+Sluit de tunnel met `Ctrl+C` en zet FoxyProxy weer uit.
 
-Je start in Jupyter Classic; via *View → Lab* schakel je over naar JupyterLab.
-
-E-mailmeldingen zijn nog niet ingesteld.
-
-**Als je klaar bent** — sluit de tunnel met `Ctrl+C` en zet FoxyProxy weer uit.
-
-> Het tunnel- en proxygedeelte verdwijnt zodra de portal een adres krijgt dat
-> over de VPN werkt. Dan typ je gewoon een adres in je browser.
-
-### 5.2 Met VS Code, Cursor of PyCharm
-
-Je bewerkt bestanden op de cluster alsof ze lokaal staan, met je eigen editor,
-extensies en sneltoetsen. Je terminal draait op de cluster.
-
-**VS Code of Cursor**
-
-1. Installeer de extensie
-   [Remote - SSH](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-ssh).
-2. `Ctrl+Shift+P` → *Remote-SSH: Connect to Host...* → `kdg-compute`.
-3. Er opent een nieuw venster. Linksonder staat **SSH: kdg-compute**.
-4. *File → Open Folder* → je eigen map, bijvoorbeeld
-   `/trinity/home/jouw_accountnaam`.
-5. *Terminal → New Terminal* geeft je een shell op de loginnode.
-
-De eerste keer installeert VS Code een klein hulpprogramma op de server; dat
-duurt even en gebeurt daarna niet meer.
-
-**PyCharm** — *Settings → Tools → SSH Configurations* → `kdg-compute`, en
-koppel die daarna aan een *Remote Interpreter* of *Deployment*.
-
-> Werk in je eigen map onder `/trinity/home/`. Die staat op gedeelde opslag en
-> is dus zichtbaar op elke node waar je job terechtkomt. Bestanden die je op één
-> node buiten die map zet, zijn elders niet te zien.
-
-### 5.3 Python, pakketten en git
-
-Er staat een handvol modules klaar, te bekijken met `module avail`:
-
-| Module | |
-|---|---|
-| `python/3.12`, `python/3.9` | Python; 3.12 is de standaard |
-| `cmake`, `gnu13`, `hwloc`, `pmix` | bouwgereedschap en MPI-onderdelen |
-| `ood-vnc` | voor grafische sessies via de portal |
-
-Laden doe je zo:
-
-```bash
-module load python/3.12
-```
-
-Voor de meeste projecten werk je echter prettiger met een eigen omgeving per
-map. [uv](https://docs.astral.sh/uv/) regelt de Python-versie, de virtuele
-omgeving en de pakketten in één, en heeft geen module nodig.
-
-Kijk eerst of het al klaarstaat:
-
-```bash
-which uv
-```
-
-Zo niet, dan installeer je het eenmalig in je eigen map:
-
-```bash
-curl -LsSf https://astral.sh/uv/install.sh | sh
-source ~/.bashrc
-```
-
-Een project opzetten:
-
-```bash
-cd /trinity/home/$USER
-mkdir mijn-project && cd mijn-project
-uv init
-uv add numpy pandas
-uv run python mijn_script.py
-```
-
-`git` staat klaar, dus je kunt gewoon een repository klonen en daarin werken.
-
-> **Let op in een jobscript.** Een job erft je interactieve omgeving niet. Laad
-> je modules daar opnieuw, en start je code via `uv run`, zodat de job dezelfde
-> pakketten gebruikt als jij in je terminal.
-
-### 5.4 Rekenwerk indienen met Slurm
-
-Dit is het belangrijkste om te weten, en tegelijk wat het meest misgaat.
-
-**De loginnode is niet om op te rekenen.** Daar bewerk je bestanden, installeer
-je dingen en dien je werk in. Het echte rekenwerk gaat naar de compute nodes,
-en Slurm verdeelt dat. Draai je een zwaar script rechtstreeks op de loginnode,
-dan hinder je iedereen die op dat moment wil inloggen.
-
-**Een job indienen.** Maak een bestand `job.sh`:
-
-```bash
-#!/bin/bash
-#SBATCH --job-name=mijn-eerste-job
-#SBATCH --partition=defg
-#SBATCH --nodes=1
-#SBATCH --ntasks=1
-#SBATCH --cpus-per-task=4
-#SBATCH --time=01:00:00
-#SBATCH --output=slurm-%j.out
-
-hostname
-cd /trinity/home/$USER/mijn-project
-uv run python mijn_script.py
-```
-
-Indienen en volgen:
-
-```bash
-sbatch job.sh          # dient de job in, toont het jobnummer
-squeue -u $USER        # toont je eigen jobs en hun status
-scancel <jobnummer>    # stopt een job
-```
-
-De uitvoer komt in `slurm-<jobnummer>.out` te staan, in de map waar je
-`sbatch` draaide.
-
-**Partities.** Met `--partition` kies je waar je job draait:
-
-| Partitie | Waarvoor |
-|---|---|
-| `defg` | De hele cluster, gedeeld. Maximaal 8 nodes |
-| `single_node` | Alleen `node001`, om te debuggen |
-
-**Interactief werken.** Wil je zelf commando's typen op een compute node in
-plaats van een script in te dienen:
-
-```bash
-srun --partition=defg --cpus-per-task=4 --time=01:00:00 --pty bash
-```
-
-Je krijgt dan een shell op een compute node. Sluit af met `exit` zodra je klaar
-bent — zolang je die shell openhoudt, blijft die capaciteit voor jou
-gereserveerd.
-
-**Wat er nog draait:**
-
-```bash
-sinfo                  # welke nodes er zijn en of ze vrij zijn
-squeue                 # alle jobs in de wachtrij
-```
-
-> Welke software er klaarstaat en hoe je je omgeving opzet, verschilt per
-> vakgebied. Vraag het aan het HPC-team via
-> [compute@kdg.be](mailto:compute@kdg.be).
+> Dit hele hoofdstuk verdwijnt zodra de portal een adres krijgt dat over de VPN
+> werkt. Dan typ je gewoon een adres in je browser, zonder tunnel en zonder
+> extensie.
 
 ---
 
-## 6. Geen toegang meer?
+## 6. Werken met de cluster
+
+Vijf manieren, van eenvoudig naar geavanceerder. Elke pagina staat op zichzelf;
+begin bij wat je nodig hebt.
+
+| | Waarvoor | Wat je nodig hebt |
+|---|---|---|
+| **[Jupyter-notebook via de portal](jupyter.md)** | Uitproberen en verkennen in je browser | Een browser en de tunnel uit stap 5 |
+| **[Werken in je eigen editor](editor.md)** | Dagelijks werk, met je eigen extensies en sneltoetsen | VS Code, Cursor of PyCharm |
+| **[Python, pakketten en git](python.md)** | Een omgeving per project opzetten | De terminal |
+| **[Rekenwerk indienen met Slurm](slurm.md)** | Werk dat te zwaar is voor de loginnode | Begrip van een wachtrij |
+| **[Verdeeld rekenen met Ray](ray.md)** | Werk over meerdere machines tegelijk | Slurm, en Ray *(in de maak)* |
+
+Weet je niet waar te beginnen: [je eigen editor](editor.md) is wat de meeste
+mensen hier dagelijks gebruiken.
+
+---
+
+## 7. Geen toegang meer?
 
 **Nieuwe laptop, of je oude nog steeds in gebruik.** Draai het setupscript op
 het nieuwe toestel. Er komt een tweede sleutel bij; die van je oude laptop
@@ -359,7 +220,7 @@ je KdG-schoolaccount.
 
 ---
 
-## 7. Problemen oplossen
+## 8. Problemen oplossen
 
 Draai `ssh -v kdg-compute` — die uitvoer laat zien welke sleutel is aangeboden
 en wat de server ermee deed.
@@ -375,7 +236,7 @@ en wat de server ermee deed.
 | `Could not resolve hostname kdg-compute` | Je hebt stap 2 niet gedraaid — gebruik het volledige adres |
 | De test in stap 7 faalt | Normaal als je een passphrase op je sleutel zette; test met `ssh kdg-compute` |
 | Je job blijft in `PD` staan in `squeue` | De cluster is bezet, of je vraagt meer dan er is. `sinfo` toont wat vrij is |
-| Portal onbereikbaar, tunnel staat open | FoxyProxy staat uit, of de naam wordt lokaal opgezocht (zie 5.1) |
+| Portal onbereikbaar, tunnel staat open | FoxyProxy staat uit, of de naam wordt lokaal opgezocht (zie stap 5) |
 
 Lukt het niet? Open een
 [issue](https://github.com/KdG-OCDI/hpc-public/issues) of stuur een mail naar
@@ -386,5 +247,5 @@ script erbij — die bevat geen geheimen.
 
 ## Meer
 
-- [Handmatige SSH-installatie](../Setup%20SSH.md) — WSL, ssh-agent, meerdere
+- [Handmatige SSH-installatie](../../Setup%20SSH.md) — WSL, ssh-agent, meerdere
   sleutels, en wat het script onder water doet
