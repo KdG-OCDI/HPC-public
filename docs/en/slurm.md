@@ -51,7 +51,7 @@ file `job.sh` in your project directory:
 ```bash
 #!/bin/bash
 #SBATCH --job-name=hello-hpc
-#SBATCH --partition=defg
+#SBATCH --partition=defq
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=4
@@ -175,8 +175,12 @@ estimate works best.
 
 | Partition | For |
 |---|---|
-| `defg` | The whole cluster, shared. Up to 8 nodes |
-| `single_node` | `node001` only, for debugging |
+| `defq` | The whole cluster, shared. This is the default, so you may leave `--partition` out |
+| `compute` | All eight nodes as well |
+| `node001` … `node008` | One specific node, for debugging |
+
+`sinfo` shows which partitions exist and whether they are free. The one with a
+`*` after it is the default.
 
 ---
 
@@ -200,7 +204,7 @@ stays at `PD`, the cluster is busy or you are asking for more than exists —
 To type commands on a compute node yourself instead of submitting a script:
 
 ```bash
-srun --partition=defg --cpus-per-task=4 --time=01:00:00 --pty bash
+srun --partition=defq --cpus-per-task=4 --time=01:00:00 --pty bash
 ```
 
 You get a shell on a compute node as soon as there is room. Useful for trying

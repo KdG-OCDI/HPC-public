@@ -20,7 +20,7 @@ You fill in a form:
 | Field | What to enter |
 |---|---|
 | **Account** | your account name |
-| **Partition** | `defg` for ordinary work, `single_node` for debugging |
+| **Partition** | `defq` for ordinary work, or `node001` for debugging |
 | **Number of nodes** | what you need, up to 8 |
 
 Click **Connect**. Your request goes into Slurm's queue: the portal does not

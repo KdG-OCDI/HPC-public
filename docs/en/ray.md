@@ -18,7 +18,7 @@ What still needs to go here:
 - a "hello Ray" example that shows how many machines your work runs on
 - a job script that starts the head node and attaches the workers to it
 - how your script connects
-- how many nodes and cores make sense on `defg`
+- how many nodes and cores make sense on `defq`
 - what to know about ports between the nodes
 
 Until then: [Submitting work with Slurm](slurm.md) describes how to put work in
