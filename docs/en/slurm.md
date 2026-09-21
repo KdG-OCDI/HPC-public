@@ -7,6 +7,36 @@ distributes it across the compute nodes.
 
 ---
 
+## Useful tooling
+
+Two things that make working with Slurm considerably more pleasant. Neither is
+required — everything works with `sbatch` and `squeue` — but they save a lot of
+going back and forth in the terminal.
+
+**[sCode](https://github.com/dhimitriosduka1/sCode)** brings Slurm into VS
+Code. Your running and pending jobs appear in the sidebar, showing how much of
+your requested time is used up; you open log files with one click, and cancel
+or hold jobs without typing a command. It also shows GPU usage per partition
+and per user.
+
+Install it from the VS Code Marketplace. Note that the extension has to run on
+a machine that knows Slurm, so install it **in your Remote-SSH window**, not
+locally — see [Working in your own editor](editor.md).
+
+**[slurm-monitor-top](https://github.com/hforoughmand/slurm-monitor-top)** is an
+`htop` for the cluster: one terminal screen with every job, which nodes are
+free, what a job actually uses against what it requested, and your job output
+streaming live. It refreshes every three seconds.
+
+```bash
+uv tool install slurm-monitor-top
+slurm-top
+```
+
+Both are third-party tools and are not maintained by the HPC team.
+
+---
+
 ## Why
 
 **The login node is not for computing.** There you edit files, install things
@@ -126,8 +156,22 @@ capacity stays reserved for you, even when you are doing nothing.
 ## The common mistake
 
 You build your environment in your terminal, submit a job, and it cannot find
-your packages. A job does not inherit your interactive environment — see
-[Python, packages and git](python.md).
+your packages.
+
+A job does not inherit your interactive environment. Whatever you loaded,
+activated or added to your `PATH` in your terminal is gone the moment Slurm
+starts your script on another node — that shell does not exist there.
+
+So state what you need explicitly in the job script. That is why the example
+above has a `cd` into the project directory and a `uv run`, rather than just
+`python hello.py`:
+
+```bash
+cd /trinity/home/$USER/my-project
+uv run python hello.py
+```
+
+See [Python, packages and git](python.md) for setting that environment up.
 
 ---
 

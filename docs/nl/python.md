@@ -128,23 +128,6 @@ aparte aan op de cluster zelf, of gebruik een token.
 
 ---
 
-## In een jobscript
-
-Een job erft je interactieve omgeving niet. Wat je in je terminal hebt geladen
-of geactiveerd, is weg zodra Slurm je script op een andere node start.
-
-Zet daarom in je jobscript expliciet wat je nodig hebt:
-
-```bash
-cd /trinity/home/$USER/mijn-project
-uv run python mijn_script.py
-```
-
-Dit is de meest voorkomende oorzaak van "het werkt in mijn terminal maar niet
-in mijn job".
-
----
-
 ## Verder
 
 - [Rekenwerk indienen met Slurm](slurm.md)
