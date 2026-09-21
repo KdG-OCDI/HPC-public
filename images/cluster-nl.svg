@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 650" width="1000" height="650" font-family="IBM Plex Sans, Segoe UI, Helvetica, Arial, sans-serif">
+  <title>De KdG HPC-cluster: login01, acht compute nodes, controller1 en de gedeelde schijf</title>
+
+  <rect x="0" y="0" width="1000" height="650" rx="14" fill="#F7F9FB"/>
+
+  <!-- ============ jouw laptop ============ -->
+  <rect x="24" y="24" width="660" height="68" rx="10" fill="#FFFFFF" stroke="#CFD7E1"/>
+  <rect x="24" y="24" width="4" height="68" rx="2" fill="#4A5769"/>
+  <circle cx="48" cy="43" r="4" fill="#4A5769"/>
+  <text x="60" y="47" font-family="IBM Plex Mono, Consolas, monospace" font-size="10.5" letter-spacing="1.4" fill="#4A5769">JOUW TOESTEL · BUITEN DE CLUSTER</text>
+  <text x="44" y="68" font-family="IBM Plex Mono, Consolas, monospace" font-size="16" font-weight="600" fill="#131C29">je laptop</text>
+  <text x="44" y="85" font-size="12.5" fill="#4A5769">Op de campus via wifi KdG, van thuis via de VPN — anders is de cluster onzichtbaar.</text>
+
+  <line x1="60" y1="92" x2="60" y2="126" stroke="#CFD7E1"/>
+  <rect x="72" y="100" width="34" height="18" rx="5" fill="#FFFFFF" stroke="#CFD7E1"/>
+  <text x="80" y="113" font-family="IBM Plex Mono, Consolas, monospace" font-size="11" fill="#131C29">ssh</text>
+  <text x="116" y="113" font-size="12" fill="#4A5769">je sleutel, poort 22</text>
+
+  <!-- ============ login01 ============ -->
+  <rect x="24" y="126" width="660" height="110" rx="10" fill="#E9F4F1" stroke="#CFD7E1"/>
+  <rect x="24" y="126" width="4" height="110" rx="2" fill="#0F6E5C"/>
+  <circle cx="48" cy="146" r="4" fill="#0F6E5C"/>
+  <text x="60" y="150" font-family="IBM Plex Mono, Consolas, monospace" font-size="10.5" letter-spacing="1.4" fill="#0F6E5C">HIER LAND JE</text>
+  <text x="44" y="172" font-family="IBM Plex Mono, Consolas, monospace" font-size="16" font-weight="600" fill="#131C29">login01<tspan fill="#4A5769" font-weight="400"> · compute.kdg.be</tspan></text>
+  <text x="44" y="190" font-size="12.5" fill="#4A5769">Bestanden bewerken, pakketten installeren, git, werk indienen — maar niet rekenen.</text>
+  <rect x="44" y="200" width="104" height="21" rx="5" fill="#FFFFFF" stroke="#CFD7E1"/>
+  <text x="54" y="215" font-family="IBM Plex Mono, Consolas, monospace" font-size="11" fill="#131C29">Rocky Linux 9</text>
+  <rect x="156" y="200" width="158" height="21" rx="5" fill="#FFFFFF" stroke="#CFD7E1"/>
+  <text x="166" y="215" font-family="IBM Plex Mono, Consolas, monospace" font-size="11" fill="#131C29">1 × NVIDIA A10 · 23 GB</text>
+  <text x="326" y="215" font-size="11.5" fill="#4A5769">die GPU is er om te testen, niet om op te trainen</text>
+
+  <line x1="60" y1="236" x2="60" y2="270" stroke="#CFD7E1"/>
+  <rect x="72" y="244" width="94" height="18" rx="5" fill="#FFFFFF" stroke="#CFD7E1"/>
+  <text x="80" y="257" font-family="IBM Plex Mono, Consolas, monospace" font-size="11" fill="#131C29">sbatch · srun</text>
+  <text x="176" y="257" font-size="12" fill="#4A5769">je vraagt capaciteit, Slurm wijst toe</text>
+
+  <!-- ============ compute nodes ============ -->
+  <rect x="24" y="270" width="660" height="230" rx="10" fill="#EAEFFA" stroke="#CFD7E1"/>
+  <rect x="24" y="270" width="4" height="230" rx="2" fill="#2B57B8"/>
+  <circle cx="48" cy="290" r="4" fill="#2B57B8"/>
+  <text x="60" y="294" font-family="IBM Plex Mono, Consolas, monospace" font-size="10.5" letter-spacing="1.4" fill="#2B57B8">HIER DRAAIT JE REKENWERK</text>
+  <text x="44" y="316" font-family="IBM Plex Mono, Consolas, monospace" font-size="16" font-weight="600" fill="#131C29">acht compute nodes</text>
+  <text x="44" y="334" font-size="12.5" fill="#4A5769">Je logt er niet rechtstreeks op in: je job komt in de wachtrij en krijgt een node toegewezen.</text>
+
+  <g font-family="IBM Plex Mono, Consolas, monospace" font-size="12.5" fill="#131C29" text-anchor="middle">
+    <rect x="44"  y="344" width="148" height="26" rx="7" fill="#FFFFFF" stroke="#CFD7E1"/><text x="118" y="361">node001</text>
+    <rect x="200" y="344" width="148" height="26" rx="7" fill="#FFFFFF" stroke="#CFD7E1"/><text x="274" y="361">node002</text>
+    <rect x="356" y="344" width="148" height="26" rx="7" fill="#FFFFFF" stroke="#CFD7E1"/><text x="430" y="361">node003</text>
+    <rect x="512" y="344" width="148" height="26" rx="7" fill="#FFFFFF" stroke="#CFD7E1"/><text x="586" y="361">node004</text>
+    <rect x="44"  y="376" width="148" height="26" rx="7" fill="#FFFFFF" stroke="#CFD7E1"/><text x="118" y="393">node005</text>
+    <rect x="200" y="376" width="148" height="26" rx="7" fill="#FFFFFF" stroke="#CFD7E1"/><text x="274" y="393">node006</text>
+    <rect x="356" y="376" width="148" height="26" rx="7" fill="#FFFFFF" stroke="#CFD7E1"/><text x="430" y="393">node007</text>
+    <rect x="512" y="376" width="148" height="26" rx="7" fill="#FFFFFF" stroke="#CFD7E1"/><text x="586" y="393">node008</text>
+  </g>
+
+  <rect x="44" y="412" width="104" height="21" rx="5" fill="#FFFFFF" stroke="#CFD7E1"/>
+  <text x="54" y="427" font-family="IBM Plex Mono, Consolas, monospace" font-size="11" fill="#131C29">Rocky Linux 9</text>
+  <rect x="156" y="412" width="168" height="21" rx="5" fill="#FFFFFF" stroke="#CFD7E1"/>
+  <text x="166" y="427" font-family="IBM Plex Mono, Consolas, monospace" font-size="11" fill="#131C29">2 × NVIDIA L40 · 46 GB</text>
+  <text x="336" y="427" font-size="11.5" fill="#4A5769">per node — samen zestien, aan te vragen bij je job</text>
+
+  <line x1="44" y1="447" x2="664" y2="447" stroke="#CFD7E1" stroke-dasharray="3 3"/>
+  <text x="44" y="465" font-family="IBM Plex Mono, Consolas, monospace" font-size="10.5" letter-spacing="1.3" fill="#4A5769">IN WELKE WACHTRIJ JE TERECHTKOMT</text>
+  <g font-size="11.5" fill="#4A5769">
+    <rect x="44" y="474" width="66" height="19" rx="5" fill="#FFFFFF" stroke="#CFD7E1"/>
+    <text x="53" y="488" font-family="IBM Plex Mono, Consolas, monospace" font-size="11" fill="#131C29">defq</text>
+    <text x="118" y="488">alle acht, gedeeld — de standaard</text>
+    <rect x="320" y="474" width="74" height="19" rx="5" fill="#FFFFFF" stroke="#CFD7E1"/>
+    <text x="329" y="488" font-family="IBM Plex Mono, Consolas, monospace" font-size="11" fill="#131C29">compute</text>
+    <text x="402" y="488">ook alle acht</text>
+    <rect x="500" y="474" width="74" height="19" rx="5" fill="#FFFFFF" stroke="#CFD7E1"/>
+    <text x="509" y="488" font-family="IBM Plex Mono, Consolas, monospace" font-size="11" fill="#131C29">node003</text>
+    <text x="582" y="488">om te debuggen</text>
+  </g>
+
+  <line x1="60" y1="500" x2="60" y2="534" stroke="#CFD7E1" stroke-dasharray="4 3"/>
+  <text x="76" y="521" font-size="12" fill="#4A5769">plant, beheert en bedient dit alles</text>
+
+  <!-- ============ controller1 ============ -->
+  <rect x="24" y="534" width="660" height="92" rx="10" fill="#FAEDE9" stroke="#CFD7E1"/>
+  <rect x="24" y="534" width="4" height="92" rx="2" fill="#A63A22"/>
+  <circle cx="48" cy="554" r="4" fill="#A63A22"/>
+  <text x="60" y="558" font-family="IBM Plex Mono, Consolas, monospace" font-size="10.5" letter-spacing="1.4" fill="#A63A22">NIET VOOR JOU</text>
+  <text x="44" y="580" font-family="IBM Plex Mono, Consolas, monospace" font-size="16" font-weight="600" fill="#131C29">controller1</text>
+  <text x="44" y="598" font-size="12.5" fill="#4A5769">De machinekamer van de cluster. Je hebt er geen login en hebt die ook niet nodig.</text>
+  <text x="44" y="616" font-size="12" fill="#4A5769">· de Slurm-planner   · gebruikers en wachtwoorden   · de webportal   · de gedeelde schijf</text>
+
+  <!-- ============ gedeelde schijf ============ -->
+  <rect x="700" y="126" width="276" height="500" rx="10" fill="#FBF3E2" stroke="#CFD7E1"/>
+  <rect x="700" y="126" width="4" height="500" rx="2" fill="#8A6212"/>
+  <circle cx="724" cy="146" r="4" fill="#8A6212"/>
+  <text x="736" y="150" font-family="IBM Plex Mono, Consolas, monospace" font-size="10.5" letter-spacing="1.4" fill="#8A6212">GEDEELDE SCHIJF</text>
+
+  <g font-size="12" fill="#4A5769">
+    <text x="718" y="174">Eén schijf, aangeboden door</text>
+    <text x="718" y="190">controller1 en aangekoppeld op de</text>
+    <text x="718" y="206">loginnode én op elke compute node.</text>
+  </g>
+
+  <rect x="777" y="336" width="126" height="19" rx="5" fill="#F3E3BE" stroke="#8A6212"/>
+  <g font-family="IBM Plex Mono, Consolas, monospace" font-size="12" fill="#4A5769" xml:space="preserve">
+    <text x="718" y="236" fill="#131C29" font-weight="600">/</text>
+    <text x="718" y="252">├─ bin  etc  usr  var</text>
+    <text x="718" y="268">├─ tmp</text>
+    <text x="718" y="284">└─ trinity/</text>
+    <text x="718" y="300">   └─ home/</text>
+    <text x="718" y="316">      ├─ jan</text>
+    <text x="718" y="332">      ├─ els</text>
+    <text x="718" y="350">      ├─ <tspan fill="#131C29" font-weight="600">jouw_accountnaam</tspan></text>
+    <text x="718" y="366">      ├─ soufiane</text>
+    <text x="718" y="382">      └─ …</text>
+  </g>
+
+  <g font-size="12" fill="#4A5769">
+    <text x="718" y="414">Alleen /trinity is gedeeld. De rest</text>
+    <text x="718" y="430">van de boom — /etc, /usr, /var, /tmp</text>
+    <text x="718" y="446">— heeft elke machine voor zich, uit</text>
+    <text x="718" y="462">haar eigen Rocky Linux 9. Wat je in</text>
+    <text x="718" y="478">/tmp zet op de ene node, is op de</text>
+    <text x="718" y="494">andere onvindbaar.</text>
+  </g>
+
+  <line x1="718" y1="516" x2="958" y2="516" stroke="#CFD7E1" stroke-dasharray="3 3"/>
+
+  <g font-size="12" fill="#4A5769">
+    <text x="718" y="538"><tspan font-weight="600" fill="#131C29">Daarom</tspan> hoef je niets te kopiëren:</text>
+    <text x="718" y="554">het bestand dat je in VS Code</text>
+    <text x="718" y="570">bewerkt is exact het bestand dat</text>
+    <text x="718" y="586">je job op node005 opent.</text>
+  </g>
+</svg>

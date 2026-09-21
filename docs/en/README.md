@@ -7,32 +7,9 @@
 Four kinds of machine and one shared directory. Once you have seen this
 picture, the rest of this page reads a good deal faster.
 
-```mermaid
-flowchart TB
-    L["your laptop<br/><i>campus wifi or VPN</i>"]
-    G["login01 · compute.kdg.be<br/><i>where you land</i>"]
-    N["node001 … node008<br/><i>where your computing runs</i>"]
-    C["controller1<br/><i>scheduler · portal · users<br/>no login for you</i>"]
-    S["/trinity/home/<br/>jan · els · <b>your_username</b> · …<br/><i>the same disk on every machine</i>"]
-
-    L -- ssh --> G
-    G -- "sbatch · srun" --> N
-    G -.-> C
-    N -.-> C
-    G --- S
-    N --- S
-
-    classDef you fill:#EDF0F4,stroke:#4A5769,color:#131C29
-    classDef login fill:#E3F3EE,stroke:#0F6E5C,color:#0B3F35
-    classDef node fill:#E5ECFA,stroke:#2B57B8,color:#1B3A7A
-    classDef ctrl fill:#FAE7E1,stroke:#A63A22,color:#6E2415
-    classDef store fill:#FBF0DA,stroke:#8A6212,color:#5A3F0B
-    class L you
-    class G login
-    class N node
-    class C ctrl
-    class S store
-```
+<p align="center">
+  <img src="../../images/cluster-en.svg" alt="Diagram of the cluster: your laptop connects over ssh to login01, which submits work to node001 through node008; controller1 schedules and manages everything; /trinity/home is the same shared disk on every machine" width="100%">
+</p>
 
 | Machine | What it means for you |
 |---|---|
