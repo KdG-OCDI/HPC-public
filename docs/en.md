@@ -2,7 +2,7 @@
 
 *[Nederlandse versie](nl.md) · [back to the start page](../README.md)*
 
-You have been given an account name and a one-time password by the HPC team.
+The HPC team has mailed you an account name and a one-time password.
 The steps below set up your access in about two minutes.
 
 | | |
@@ -51,9 +51,9 @@ curl -fsSL https://raw.githubusercontent.com/KdG-OCDI/hpc-public/main/tools/kdg-
 less kdg-hpc-setup.sh && bash kdg-hpc-setup.sh
 ```
 
-The script asks for your account name, and then **once** for your password at
-the server's own prompt. That password goes straight to the cluster; the script
-never reads or stores it.
+The script asks for your account name, and then **once** for the password from
+that mail, at the server's own prompt. That password goes straight to the
+cluster; the script never reads or stores it.
 
 Running it again is always safe — it applies nothing twice.
 
@@ -102,11 +102,20 @@ From there you open folders on the server and submit jobs with Slurm.
 
 ## 4. Your password
 
-Step 8 of the script generates a strong password and puts it on your clipboard.
-**Save it in your password manager.** You will not need it for SSH after this
-setup, but it is your way back in if you ever lose your key.
+There are two passwords in play, and the difference is worth getting straight.
 
-If you skipped step 8, change your password later:
+The one **from the email** is a starter password. You use it once, in step 5 of
+the script. Step 8 then replaces it with a strong random one and puts that on
+your clipboard.
+
+> **Save that new password in your password manager.** From that moment on, the
+> one from the email no longer works.
+
+For everyday use you need neither — logging in goes through your key. The new
+password is your way back in if you ever lose that key.
+
+If you skipped step 8, the password from the email stays valid. Replace it
+later instead:
 
 ```bash
 ssh kdg-compute passwd

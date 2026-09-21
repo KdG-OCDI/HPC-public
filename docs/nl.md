@@ -2,8 +2,8 @@
 
 *[English version](en.md) · [terug naar de startpagina](../README.md)*
 
-Je hebt een accountnaam en een eenmalig wachtwoord gekregen van het HPC-team.
-Hieronder zet je in ongeveer twee minuten je toegang op.
+Je hebt per mail een accountnaam en een eenmalig wachtwoord gekregen van het
+HPC-team. Hieronder zet je in ongeveer twee minuten je toegang op.
 
 | | |
 |---|---|
@@ -51,9 +51,9 @@ curl -fsSL https://raw.githubusercontent.com/KdG-OCDI/hpc-public/main/tools/kdg-
 less kdg-hpc-setup.sh && bash kdg-hpc-setup.sh
 ```
 
-Het script vraagt je accountnaam, en daarna **eenmalig** je wachtwoord bij de
-prompt van de server. Dat wachtwoord gaat rechtstreeks naar de cluster; het
-script leest of bewaart het niet.
+Het script vraagt je accountnaam, en daarna **eenmalig** het wachtwoord uit die
+mail, bij de prompt van de server. Dat wachtwoord gaat rechtstreeks naar de
+cluster; het script leest of bewaart het niet.
 
 Opnieuw draaien is altijd veilig — het script past niets dubbel toe.
 
@@ -101,11 +101,22 @@ Vanaf daar open je mappen op de server en dien je jobs in met Slurm.
 
 ## 4. Je wachtwoord
 
-Stap 8 van het script genereert een sterk wachtwoord en zet het op je klembord.
-**Bewaar het in je wachtwoordbeheerder.** Na deze setup heb je het voor SSH niet
-meer nodig, maar het is je noodingang als je ooit je sleutel kwijt bent.
+Je hebt met twee wachtwoorden te maken, en dat is één bron van verwarring waard
+om weg te nemen.
 
-Sla je stap 8 over, wijzig je wachtwoord dan later alsnog:
+Het wachtwoord **uit de mail** is een startwachtwoord. Je gebruikt het één keer,
+in stap 5 van het script. Daarna vervangt stap 8 het door een sterk,
+willekeurig exemplaar en zet dat op je klembord.
+
+> **Bewaar dát nieuwe wachtwoord in je wachtwoordbeheerder.** Vanaf dat moment
+> werkt het wachtwoord uit de mail niet meer.
+
+Voor dagelijks gebruik heb je geen van beide nodig — inloggen gaat met je
+sleutel. Het nieuwe wachtwoord is je noodingang voor als je ooit je sleutel
+kwijt bent.
+
+Heb je stap 8 overgeslagen, dan blijft het wachtwoord uit de mail gewoon
+geldig. Vervang het dan later alsnog:
 
 ```bash
 ssh kdg-compute passwd
