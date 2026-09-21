@@ -2,6 +2,47 @@
 
 *[Nederlandse versie](../nl/README.md) · [back to the start page](../../README.md)*
 
+## The cluster at a glance
+
+Four kinds of machine and one shared directory. Once you have seen this
+picture, the rest of this page reads a good deal faster.
+
+```mermaid
+flowchart TB
+    L["your laptop<br/><i>campus wifi or VPN</i>"]
+    G["login01 · compute.kdg.be<br/><i>where you land</i>"]
+    N["node001 … node008<br/><i>where your computing runs</i>"]
+    C["controller1<br/><i>scheduler · portal · users<br/>no login for you</i>"]
+    S["/trinity/home/your_username<br/><i>the same directory on every machine</i>"]
+
+    L -- ssh --> G
+    G -- "sbatch · srun" --> N
+    G -.-> C
+    N -.-> C
+    G --- S
+    N --- S
+
+    classDef you fill:#EDF0F4,stroke:#4A5769,color:#131C29
+    classDef login fill:#E3F3EE,stroke:#0F6E5C,color:#0B3F35
+    classDef node fill:#E5ECFA,stroke:#2B57B8,color:#1B3A7A
+    classDef ctrl fill:#FAE7E1,stroke:#A63A22,color:#6E2415
+    classDef store fill:#FBF0DA,stroke:#8A6212,color:#5A3F0B
+    class L you
+    class G login
+    class N node
+    class C ctrl
+    class S store
+```
+
+| Machine | What it means for you |
+|---|---|
+| **login01** | The only machine you log in to. Editing files, installing packages, git, submitting work — but no computing: there is one of it and everyone shares it |
+| **node001 … node008** | Where your computing runs. You do not log in to them directly; you submit work and Slurm assigns a node as soon as there is room |
+| **controller1** | The engine room: the scheduler, user management, the web portal and the shared storage. You have no login there, and do not need one |
+| **/trinity/home/…** | Your directory, the same one on the login node and on every compute node. What you save here your job sees too — no copying needed |
+
+---
+
 The HPC team has mailed you an account name and a password. The steps below set
 up your access in about two minutes.
 
