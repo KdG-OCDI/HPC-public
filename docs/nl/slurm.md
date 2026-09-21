@@ -57,6 +57,7 @@ bestand `job.sh` in je projectmap:
 #SBATCH --cpus-per-task=4
 #SBATCH --time=00:05:00
 #SBATCH --output=slurm-%j.out
+#SBATCH --error=slurm-%j.err
 
 cd /trinity/home/$USER/mijn-project
 uv run python hello.py
@@ -107,9 +108,52 @@ er meteen, ook terwijl hij nog draait. Je hoeft het jobnummer niet te
 onthouden en niet te weten in welke map je `sbatch` draaide — en dat is precies
 waar je op dat moment naar zoekt.
 
-> Foutmeldingen komen in hetzelfde bestand terecht, omdat we alleen
-> `--output` hebben opgegeven. Wil je ze apart, voeg dan
-> `#SBATCH --error=slurm-%j.err` toe.
+> Foutmeldingen komen in `slurm-4711.err` terecht, door de `--error`-regel in
+> het script. Laat je die weg, dan belandt alles door elkaar in hetzelfde
+> bestand — apart houden scheelt zoeken.
+
+---
+
+## Omgevingsvariabelen
+
+`sbatch` neemt standaard je huidige omgevingsvariabelen mee naar de job; dat is
+wat `--export=ALL` doet, en dat staat al zo ingesteld.
+
+Dat klinkt handig, maar het is een valkuil: je job gaat daardoor afhangen van
+de terminal waaruit je hem indiende. Vandaag werkt hij omdat je net iets hebt
+gezet, morgen faalt hij vanuit een verse terminal. Een fout die soms werkt is
+lastiger te vinden dan een die altijd faalt.
+
+Zet daarom in je script wat je nodig hebt, in plaats van erop te vertrouwen dat
+het meekomt.
+
+**Een `.env` in je project.** Die hoeft nergens heen: je projectmap staat op
+gedeelde opslag, dus elke node ziet dat bestand al. Je moet hem alleen laten
+inlezen:
+
+```bash
+cd /trinity/home/$USER/mijn-project
+uv run --env-file .env python hello.py
+```
+
+Of laad hem in je code met `python-dotenv`, als je dat al gebruikt.
+
+**Eén variabele voor deze ene job.** Zet hem gewoon in het script, boven je
+commando:
+
+```bash
+export SEED=42
+uv run python hello.py
+```
+
+Of geef hem mee bij het indienen:
+
+```bash
+sbatch --export=ALL,SEED=42 job.sh
+```
+
+**Wat níét meekomt:** alles wat je `.bashrc` alleen voor interactieve shells
+doet. Een job draait geen interactieve shell, dus wat daar staat gebeurt niet.
 
 ---
 
@@ -123,6 +167,7 @@ waar je op dat moment naar zoekt.
 | `--cpus-per-task` | cores per proces |
 | `--time` | maximale looptijd, `uu:mm:ss` |
 | `--output` | bestand voor de uitvoer; `%j` wordt het jobnummer |
+| `--error` | bestand voor de foutmeldingen |
 
 Vraag je te weinig tijd, dan wordt je job afgebroken zodra die op is. Vraag je
 veel te veel, dan kom je verder achteraan in de wachtrij. Een ruime maar
@@ -171,23 +216,21 @@ de capaciteit voor jou gereserveerd, ook als je niets doet.
 
 ## Veelgemaakte fout
 
-Je bouwt je omgeving op in je terminal, dient een job in, en die vindt je
-pakketten niet.
+Je job vindt je pakketten niet, terwijl hetzelfde script in je terminal wel
+werkt.
 
-Een job erft je interactieve omgeving niet. Wat je in je terminal hebt geladen,
-geactiveerd of aan je `PATH` hebt toegevoegd, is weg zodra Slurm je script op
-een andere node start — die shell bestaat daar niet.
-
-Zet daarom in je jobscript expliciet wat je nodig hebt. Daarom staat er in het
-voorbeeld hierboven ook een `cd` naar de projectmap en een `uv run`, en niet
-alleen `python hello.py`:
+Meestal komt dat doordat het script vertrouwt op waar je toevallig stond of
+wat je toevallig had geactiveerd. Daarom begint het voorbeeld hierboven met een
+`cd` naar de projectmap en draait het via `uv run`, in plaats van alleen
+`python hello.py`:
 
 ```bash
 cd /trinity/home/$USER/mijn-project
 uv run python hello.py
 ```
 
-Zie [Python, pakketten en git](python.md) voor het opzetten van die omgeving.
+Zo hangt je job aan je projectmap en niet aan je shell. Zie
+[Python, pakketten en git](python.md) voor het opzetten van die omgeving.
 
 ---
 

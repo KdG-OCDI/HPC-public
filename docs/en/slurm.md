@@ -57,6 +57,7 @@ file `job.sh` in your project directory:
 #SBATCH --cpus-per-task=4
 #SBATCH --time=00:05:00
 #SBATCH --output=slurm-%j.out
+#SBATCH --error=slurm-%j.err
 
 cd /trinity/home/$USER/my-project
 uv run python hello.py
@@ -107,9 +108,50 @@ right there, including while it is still running. You do not have to remember
 the job number, or which directory you ran `sbatch` in — which is exactly what
 you are looking for at that moment.
 
-> Error messages end up in the same file, because we only specified
-> `--output`. To keep them separate, add
-> `#SBATCH --error=slurm-%j.err`.
+> Error messages land in `slurm-4711.err`, thanks to the `--error` line in the
+> script. Leave that out and everything ends up jumbled in the same file —
+> keeping them apart saves searching.
+
+---
+
+## Environment variables
+
+`sbatch` copies your current environment variables into the job by default;
+that is what `--export=ALL` does, and it is already the setting.
+
+That sounds convenient, but it is a trap: it makes your job depend on the
+terminal you submitted it from. Today it works because you just set something,
+tomorrow it fails from a fresh terminal. A fault that sometimes works is harder
+to find than one that always fails.
+
+So state in your script what you need, instead of trusting that it comes along.
+
+**A `.env` in your project.** It does not need to go anywhere: your project
+directory is on shared storage, so every node already sees that file. You only
+have to have it read:
+
+```bash
+cd /trinity/home/$USER/my-project
+uv run --env-file .env python hello.py
+```
+
+Or load it in your code with `python-dotenv`, if you use that already.
+
+**One variable for this one job.** Put it in the script, above your command:
+
+```bash
+export SEED=42
+uv run python hello.py
+```
+
+Or pass it at submission:
+
+```bash
+sbatch --export=ALL,SEED=42 job.sh
+```
+
+**What does not come along:** anything your `.bashrc` only does for interactive
+shells. A job does not run an interactive shell, so none of that happens.
 
 ---
 
@@ -123,6 +165,7 @@ you are looking for at that moment.
 | `--cpus-per-task` | cores per process |
 | `--time` | maximum run time, `hh:mm:ss` |
 | `--output` | file for the output; `%j` becomes the job number |
+| `--error` | file for the error messages |
 
 Ask for too little time and your job is killed when it runs out. Ask for far
 too much and you end up further back in the queue. A generous but realistic
@@ -170,23 +213,21 @@ capacity stays reserved for you, even when you are doing nothing.
 
 ## The common mistake
 
-You build your environment in your terminal, submit a job, and it cannot find
-your packages.
+Your job cannot find your packages, while the same script works fine in your
+terminal.
 
-A job does not inherit your interactive environment. Whatever you loaded,
-activated or added to your `PATH` in your terminal is gone the moment Slurm
-starts your script on another node — that shell does not exist there.
-
-So state what you need explicitly in the job script. That is why the example
-above has a `cd` into the project directory and a `uv run`, rather than just
-`python hello.py`:
+Usually that is because the script relies on where you happened to be standing
+or what you happened to have activated. Which is why the example above starts
+with a `cd` into the project directory and runs through `uv run`, rather than
+just `python hello.py`:
 
 ```bash
 cd /trinity/home/$USER/my-project
 uv run python hello.py
 ```
 
-See [Python, packages and git](python.md) for setting that environment up.
+That way your job hangs off your project directory rather than your shell. See
+[Python, packages and git](python.md) for setting that environment up.
 
 ---
 
