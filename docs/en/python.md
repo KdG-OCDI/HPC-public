@@ -130,23 +130,6 @@ use a token.
 
 ---
 
-## In a job script
-
-A job does not inherit your interactive environment. Whatever you loaded or
-activated in your terminal is gone the moment Slurm starts your script on
-another node.
-
-So state what you need explicitly in the job script:
-
-```bash
-cd /trinity/home/$USER/my-project
-uv run python my_script.py
-```
-
-This is the most common cause of "it works in my terminal but not in my job".
-
----
-
 ## Next
 
 - [Submitting work with Slurm](slurm.md)

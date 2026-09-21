@@ -7,6 +7,36 @@ over de compute nodes.
 
 ---
 
+## Handig gereedschap
+
+Twee dingen die het werken met Slurm een stuk aangenamer maken. Geen van beide
+is nodig — je kunt alles met `sbatch` en `squeue` — maar ze besparen veel
+heen-en-weer in de terminal.
+
+**[sCode](https://github.com/dhimitriosduka1/sCode)** brengt Slurm in VS Code.
+Je ziet je draaiende en wachtende jobs in de zijbalk, met hoeveel van je
+gevraagde tijd al op is, je opent de logbestanden met één klik, en je annuleert
+of pauzeert jobs zonder een commando te typen. Ook handig: het toont het
+GPU-gebruik per partitie en per gebruiker.
+
+Installeren via de VS Code Marketplace. Let op: de extensie moet draaien op een
+machine die Slurm kent, dus installeer hem **in je Remote-SSH-venster**, niet
+lokaal — zie [Werken in je eigen editor](editor.md).
+
+**[slurm-monitor-top](https://github.com/hforoughmand/slurm-monitor-top)** is
+een `htop` voor de cluster: één terminalscherm met alle jobs, welke nodes vrij
+zijn, wat een job werkelijk verbruikt tegenover wat hij heeft aangevraagd, en
+de uitvoer van je jobs live meelezend. Ververst elke drie seconden.
+
+```bash
+uv tool install slurm-monitor-top
+slurm-top
+```
+
+Beide zijn gemaakt door derden en worden niet door het HPC-team onderhouden.
+
+---
+
 ## Waarom
 
 **De loginnode is niet om op te rekenen.** Daar bewerk je bestanden, installeer
@@ -127,8 +157,22 @@ de capaciteit voor jou gereserveerd, ook als je niets doet.
 ## Veelgemaakte fout
 
 Je bouwt je omgeving op in je terminal, dient een job in, en die vindt je
-pakketten niet. Een job erft je interactieve omgeving niet — zie
-[Python, pakketten en git](python.md).
+pakketten niet.
+
+Een job erft je interactieve omgeving niet. Wat je in je terminal hebt geladen,
+geactiveerd of aan je `PATH` hebt toegevoegd, is weg zodra Slurm je script op
+een andere node start — die shell bestaat daar niet.
+
+Zet daarom in je jobscript expliciet wat je nodig hebt. Daarom staat er in het
+voorbeeld hierboven ook een `cd` naar de projectmap en een `uv run`, en niet
+alleen `python hello.py`:
+
+```bash
+cd /trinity/home/$USER/mijn-project
+uv run python hello.py
+```
+
+Zie [Python, pakketten en git](python.md) voor het opzetten van die omgeving.
 
 ---
 
