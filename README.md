@@ -16,7 +16,6 @@ Documentation for the KdG HPC cluster.
 The cluster is only reachable from the KdG network.
 
 - **On campus:** connect to the `KdG` WiFi SSID.
-  *Researchers: the cluster is not reachable on the `NxT-Research` SSID.*
 - **Remote:** connect with the **GlobalProtect VPN** —
   [instructions (NL)](https://studentkdg.sharepoint.com/sites/intranet-nl-ict/SitePages/GlobalProtect-(VPN).aspx)
 
