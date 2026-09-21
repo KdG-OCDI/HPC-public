@@ -6,33 +6,11 @@ Hoe je een project opzet met zijn eigen Python en zijn eigen pakketten.
 
 ---
 
-## De modules op de cluster
-
-Er staat een handvol modules klaar, te bekijken met `module avail`:
-
-| Module | |
-|---|---|
-| `python/3.12`, `python/3.9` | Python; 3.12 is de standaard |
-| `cmake`, `gnu13`, `hwloc`, `pmix` | bouwgereedschap en MPI-onderdelen |
-| `ood-vnc` | voor grafische sessies via de portal |
-
-Laden doe je zo:
-
-```bash
-module load python/3.12
-```
-
-Dat geeft je een Python, maar geen plek om pakketten te installeren die niet in
-de weg zitten van iemand anders. Daarvoor is het volgende handiger.
-
----
-
 ## Een omgeving per project met uv
 
 [uv](https://docs.astral.sh/uv/) regelt de Python-versie, de virtuele omgeving
-en de pakketten in één, en heeft geen module nodig. De omgeving hangt aan de
-map, niet aan je shell — dus hij reist mee naar de compute node waar je job
-draait.
+en de pakketten in één. De omgeving hangt aan de map, niet aan je shell — dus
+hij reist mee naar de compute node waar je job draait.
 
 Kijk eerst of het al klaarstaat:
 
@@ -96,8 +74,6 @@ Zet daarom in je jobscript expliciet wat je nodig hebt:
 cd /trinity/home/$USER/mijn-project
 uv run python mijn_script.py
 ```
-
-Gebruik je modules, laad die dan ook opnieuw in het script.
 
 Dit is de meest voorkomende oorzaak van "het werkt in mijn terminal maar niet
 in mijn job".

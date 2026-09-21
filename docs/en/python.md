@@ -6,33 +6,12 @@ How to set up a project with its own Python and its own packages.
 
 ---
 
-## The modules on the cluster
-
-A handful of modules is available, listed by `module avail`:
-
-| Module | |
-|---|---|
-| `python/3.12`, `python/3.9` | Python; 3.12 is the default |
-| `cmake`, `gnu13`, `hwloc`, `pmix` | build tooling and MPI components |
-| `ood-vnc` | for graphical sessions through the portal |
-
-Load one like this:
-
-```bash
-module load python/3.12
-```
-
-That gives you a Python, but no place to install packages without getting in
-anyone else's way. For that, the next section is more practical.
-
----
-
 ## A per-project environment with uv
 
 [uv](https://docs.astral.sh/uv/) handles the Python version, the virtual
-environment and the packages in one, and needs no module. The environment
-belongs to the directory rather than to your shell — so it travels to whichever
-compute node runs your job.
+environment and the packages in one. The environment belongs to the directory
+rather than to your shell — so it travels to whichever compute node runs your
+job.
 
 Check whether it is already there:
 
@@ -98,8 +77,6 @@ So state what you need explicitly in the job script:
 cd /trinity/home/$USER/my-project
 uv run python my_script.py
 ```
-
-If you use modules, load them again there as well.
 
 This is the most common cause of "it works in my terminal but not in my job".
 
