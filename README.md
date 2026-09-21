@@ -151,21 +151,6 @@ Email notifications are not configured yet.
 
 ---
 
-## 5. Monitoring and alerts
-
-The **HPC** team in KdG MS Teams receives alerts from the cluster's Grafana
-dashboard. Email alerts are not configured yet.
-
----
-
-## 6. Admin access
-
-```bash
-ssh <username>@datalab.kdg.be
-```
-
----
-
 ## Repository layout
 
 | Path | Contents |
@@ -175,7 +160,6 @@ ssh <username>@datalab.kdg.be
 | `Setup SSH.md` | Manual SSH setup, WSL, ssh-agent, advanced configurations |
 | `tools/kdg-hpc-setup.ps1` | Automated setup script — Windows |
 | `tools/kdg-hpc-setup.sh` | Automated setup script — macOS / Linux |
-| `server/` | Login-node configuration: centrally managed SSH keys |
 | `images/` | Screenshots used in this documentation |
 
 ## Support
