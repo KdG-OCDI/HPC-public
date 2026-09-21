@@ -2,14 +2,15 @@
 
 *[English version](en.md) · [terug naar de startpagina](../README.md)*
 
-Je hebt per mail een accountnaam en een eenmalig wachtwoord gekregen van het
-HPC-team. Hieronder zet je in ongeveer twee minuten je toegang op.
+Je hebt per mail een accountnaam en een wachtwoord gekregen van het HPC-team.
+Hieronder zet je in ongeveer twee minuten je toegang op.
 
 | | |
 |---|---|
 | **Loginnode (SSH)** | `compute.kdg.be` |
-| **Webportal** | Open OnDemand, via een tunnel (zie [stap 5](#5-de-grafische-omgeving)) |
+| **Je map op de cluster** | `/trinity/home/jouw_accountnaam`, zichtbaar op alle nodes |
 | **Planner** | Slurm — `sbatch`, `srun`, `squeue` |
+| **Webportal** | Open OnDemand, via een tunnel (zie [5.3](#53-een-jupyter-notebook-via-de-portal)) |
 
 ---
 
@@ -44,7 +45,7 @@ irm https://raw.githubusercontent.com/KdG-OCDI/hpc-public/main/tools/kdg-hpc-set
 curl -fsSL https://raw.githubusercontent.com/KdG-OCDI/hpc-public/main/tools/kdg-hpc-setup.sh | bash
 ```
 
-Wil je eerst zien wat het script doet? Haal het dan eerst op en lees het:
+Wil je eerst zien wat het script doet? Haal het dan op en lees het:
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/KdG-OCDI/hpc-public/main/tools/kdg-hpc-setup.sh -o kdg-hpc-setup.sh
@@ -68,17 +69,19 @@ Opnieuw draaien is altijd veilig — het script past niets dubbel toe.
 | 5 | Zet je **publieke** sleutel op de loginnode |
 | 6 | Voegt een `kdg-compute`-blok toe aan je lokale `~/.ssh/config` |
 | 7 | Test of wachtwoordloos inloggen werkt |
-| 8 | Biedt aan je wachtwoord te vervangen door een sterk, willekeurig exemplaar |
 
 Je **private** sleutel verlaat je laptop nooit.
 
 ---
 
-## 3. Verbinden
+## 3. Test je verbinding
 
 ```bash
 ssh kdg-compute
 ```
+
+Je komt nu zonder wachtwoord op de loginnode terecht. Verlaten doe je met
+`exit`.
 
 `kdg-compute` is de naam die het script in je `~/.ssh/config` heeft gezet — geen
 adres op het internet. Heb je stap 2 niet gedraaid, gebruik dan je accountnaam
@@ -88,35 +91,17 @@ en het echte adres:
 ssh jouw_accountnaam@compute.kdg.be
 ```
 
-**In je editor:**
-
-- **VS Code / Cursor** — installeer de extensie
-  [Remote - SSH](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-ssh),
-  dan `Ctrl+Shift+P` → *Remote-SSH: Connect to Host...* → `kdg-compute`
-- **PyCharm** — *Settings → Tools → SSH Configurations* → `kdg-compute`
-
-Vanaf daar open je mappen op de server en dien je jobs in met Slurm.
-
 ---
 
 ## 4. Je wachtwoord
 
-Je hebt met twee wachtwoorden te maken, en dat is één bron van verwarring waard
-om weg te nemen.
+Je hebt het wachtwoord uit de mail nog één keer nodig gehad, in stap 2. Daarna
+niet meer: inloggen gaat vanaf nu met je sleutel.
 
-Het wachtwoord **uit de mail** is een startwachtwoord. Je gebruikt het één keer,
-in stap 5 van het script. Daarna vervangt stap 8 het door een sterk,
-willekeurig exemplaar en zet dat op je klembord.
+**Bewaar die mail toch**, of zet het wachtwoord in je wachtwoordbeheerder. Het
+is je noodingang voor als je ooit je sleutel kwijt bent.
 
-> **Bewaar dát nieuwe wachtwoord in je wachtwoordbeheerder.** Vanaf dat moment
-> werkt het wachtwoord uit de mail niet meer.
-
-Voor dagelijks gebruik heb je geen van beide nodig — inloggen gaat met je
-sleutel. Het nieuwe wachtwoord is je noodingang voor als je ooit je sleutel
-kwijt bent.
-
-Heb je stap 8 overgeslagen, dan blijft het wachtwoord uit de mail gewoon
-geldig. Vervang het dan later alsnog:
+Wil je het vervangen door iets eigens, dan kan dat zodra je verbinding werkt:
 
 ```bash
 ssh kdg-compute passwd
@@ -124,16 +109,110 @@ ssh kdg-compute passwd
 
 ---
 
-## 5. De grafische omgeving
+## 5. Werken op de cluster
 
-Voor Jupyter-notebooks in je browser. Dit heeft een werkend SSH-account nodig,
-dus doe eerst stap 2.
+Er zijn twee manieren, en de meeste mensen gebruiken de eerste.
+
+### 5.1 Met VS Code, Cursor of PyCharm
+
+Je bewerkt bestanden op de cluster alsof ze lokaal staan, met je eigen editor,
+extensies en sneltoetsen. Je terminal draait op de cluster.
+
+**VS Code of Cursor**
+
+1. Installeer de extensie
+   [Remote - SSH](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-ssh).
+2. `Ctrl+Shift+P` → *Remote-SSH: Connect to Host...* → `kdg-compute`.
+3. Er opent een nieuw venster. Linksonder staat **SSH: kdg-compute**.
+4. *File → Open Folder* → je eigen map, bijvoorbeeld
+   `/trinity/home/jouw_accountnaam`.
+5. *Terminal → New Terminal* geeft je een shell op de loginnode.
+
+De eerste keer installeert VS Code een klein hulpprogramma op de server; dat
+duurt even en gebeurt daarna niet meer.
+
+**PyCharm** — *Settings → Tools → SSH Configurations* → `kdg-compute`, en
+koppel die daarna aan een *Remote Interpreter* of *Deployment*.
+
+> Werk in je eigen map onder `/trinity/home/`. Die staat op gedeelde opslag en
+> is dus zichtbaar op elke node waar je job terechtkomt. Bestanden die je op één
+> node buiten die map zet, zijn elders niet te zien.
+
+### 5.2 Rekenwerk indienen met Slurm
+
+Dit is het belangrijkste om te weten, en tegelijk wat het meest misgaat.
+
+**De loginnode is niet om op te rekenen.** Daar bewerk je bestanden, installeer
+je dingen en dien je werk in. Het echte rekenwerk gaat naar de compute nodes,
+en Slurm verdeelt dat. Draai je een zwaar script rechtstreeks op de loginnode,
+dan hinder je iedereen die op dat moment wil inloggen.
+
+**Een job indienen.** Maak een bestand `job.sh`:
+
+```bash
+#!/bin/bash
+#SBATCH --job-name=mijn-eerste-job
+#SBATCH --partition=defg
+#SBATCH --nodes=1
+#SBATCH --ntasks=1
+#SBATCH --cpus-per-task=4
+#SBATCH --time=01:00:00
+#SBATCH --output=slurm-%j.out
+
+hostname
+python3 mijn_script.py
+```
+
+Indienen en volgen:
+
+```bash
+sbatch job.sh          # dient de job in, toont het jobnummer
+squeue -u $USER        # toont je eigen jobs en hun status
+scancel <jobnummer>    # stopt een job
+```
+
+De uitvoer komt in `slurm-<jobnummer>.out` te staan, in de map waar je
+`sbatch` draaide.
+
+**Partities.** Met `--partition` kies je waar je job draait:
+
+| Partitie | Waarvoor |
+|---|---|
+| `defg` | De hele cluster, gedeeld. Maximaal 8 nodes |
+| `single_node` | Alleen `node001`, om te debuggen |
+
+**Interactief werken.** Wil je zelf commando's typen op een compute node in
+plaats van een script in te dienen:
+
+```bash
+srun --partition=defg --cpus-per-task=4 --time=01:00:00 --pty bash
+```
+
+Je krijgt dan een shell op een compute node. Sluit af met `exit` zodra je klaar
+bent — zolang je die shell openhoudt, blijft die capaciteit voor jou
+gereserveerd.
+
+**Wat er nog draait:**
+
+```bash
+sinfo                  # welke nodes er zijn en of ze vrij zijn
+squeue                 # alle jobs in de wachtrij
+```
+
+> Welke software er klaarstaat en hoe je je omgeving opzet, verschilt per
+> vakgebied. Vraag het aan het HPC-team via
+> [compute@kdg.be](mailto:compute@kdg.be).
+
+### 5.3 Een Jupyter-notebook via de portal
+
+Handig als je in je browser wil werken. Dit heeft een werkend SSH-account
+nodig, dus doe eerst stap 2.
 
 De portal draait op een adres dat alleen binnen het clusternetwerk bestaat. Je
 browser kan die naam niet vinden, ook niet met VPN. Daarom stuur je je
 browserverkeer door een tunnel die de naam aan de clusterkant laat opzoeken.
 
-### Stap 1 — open de tunnel
+**Stap 1 — open de tunnel**
 
 ```bash
 ssh -N -D 9090 kdg-compute
@@ -143,10 +222,10 @@ Dit commando blokkeert en geeft geen uitvoer. Dat hoort zo: laat het venster
 open zolang je de portal gebruikt. Elk poortnummer boven 1024 mag in plaats van
 9090.
 
-### Stap 2 — stuur je browser door de tunnel
+**Stap 2 — stuur je browser door de tunnel**
 
 Gebruik hiervoor [FoxyProxy](https://addons.mozilla.org/nl/firefox/addon/foxyproxy-standard/),
-beschikbaar voor Firefox, Chrome en Edge. Dat kan ook via de instellingen van
+beschikbaar voor Firefox, Chrome en Edge. Het kan ook via de instellingen van
 je besturingssysteem, maar dan gaat **al** je internetverkeer door de cluster —
 inclusief je gewone browsen. FoxyProxy laat je het beperken tot alleen het
 clusteradres.
@@ -171,45 +250,55 @@ Voeg daarna een regel toe van het type *wildcard* met dit patroon, en kies
 > Doe je het via je systeeminstellingen, dan werkt het vaak niet om precies
 > deze reden.
 
-### Stap 3 — open de portal
+**Stap 3 — open de portal**
 
 Ga naar [https://controller1.cluster:8080](https://controller1.cluster:8080) en
 klik op **Azure SSO Login** om met je schoolaccount aan te melden.
 
 ![Aanmeldpagina](../images/login_page.png)
 
-### Stap 4 — start een notebook
+**Stap 4 — start een notebook**
 
 Klik op de startpagina op **Jupyter notebook** onder *Interactive Apps*.
 
 - Vul je accountnaam in.
-- Kies een partitie:
-  - `defg` — de hele cluster, gedeeld. Kies het aantal nodes dat je nodig hebt,
-    maximaal 8.
-  - `single_node` — alleen `node001`, om te debuggen.
+- Kies een partitie: `defg` voor gewoon werk, `single_node` om te debuggen.
+- Kies het aantal nodes dat je nodig hebt, maximaal 8.
 - Klik **Connect**. Je komt in je eigen map terecht.
 
 Je start in Jupyter Classic; via *View → Lab* schakel je over naar JupyterLab.
 
 E-mailmeldingen zijn nog niet ingesteld.
 
-### Als je klaar bent
+**Als je klaar bent** — sluit de tunnel met `Ctrl+C` en zet FoxyProxy weer uit.
 
-Sluit de tunnel met `Ctrl+C` en zet FoxyProxy weer uit.
-
-> Dit hele hoofdstuk verdwijnt zodra de portal een adres krijgt dat over de VPN
-> werkt. Dan typ je gewoon een adres in je browser, zonder tunnel en zonder
-> extensie.
+> Het tunnel- en proxygedeelte verdwijnt zodra de portal een adres krijgt dat
+> over de VPN werkt. Dan typ je gewoon een adres in je browser.
 
 ---
 
 ## 6. Geen toegang meer?
 
-Nieuwe laptop of sleutel kwijt? Draai het setupscript gewoon opnieuw op je
-nieuwe toestel — daarvoor heb je wel je wachtwoord nodig.
+**Nieuwe laptop, of je oude nog steeds in gebruik.** Draai het setupscript op
+het nieuwe toestel. Er komt een tweede sleutel bij; die van je oude laptop
+blijft gewoon werken. Je hebt hiervoor het wachtwoord uit de mail nodig.
 
-Ben je dat ook kwijt, neem dan contact op met het HPC-team. Je identiteit wordt
-gecontroleerd via je KdG-schoolaccount.
+**Sleutel kwijt of laptop gestolen.** Draai het script op je nieuwe toestel, en
+verwijder daarna de oude sleutel van de server — anders houdt wie die laptop
+heeft toegang. Log in en open het bestand:
+
+```bash
+ssh kdg-compute
+nano ~/.ssh/authorized_keys
+```
+
+Elke regel is één sleutel, met achteraan een naam als
+`jouw_accountnaam@LAPTOP-OUD`. Verwijder de regel van het toestel dat je kwijt
+bent, en bewaar met `Ctrl+O`, `Ctrl+X`.
+
+**Wachtwoord ook kwijt.** Neem contact op met het HPC-team via
+[compute@kdg.be](mailto:compute@kdg.be). Je identiteit wordt gecontroleerd via
+je KdG-schoolaccount.
 
 ---
 
@@ -222,16 +311,19 @@ en wat de server ermee deed.
 |---|---|
 | `compute.kdg.be is niet bereikbaar` | VPN staat niet aan, of is nog aan het verbinden |
 | `ssh.exe is niet gevonden` (Windows) | Draai `Add-WindowsCapability -Online -Name OpenSSH.Client~~~~0.0.1.0` in een PowerShell **als administrator** |
-| `Permission denied` bij het wachtwoord | Accountnaam of eenmalig wachtwoord klopt niet — neem contact op |
+| `Permission denied` bij het wachtwoord | Accountnaam of wachtwoord klopt niet — neem contact op |
 | `Permission denied (publickey)` | Je sleutel staat niet op de server. Draai stap 2 opnieuw |
 | `WARNING: UNPROTECTED PRIVATE KEY FILE` | Je private sleutel is te ruim leesbaar: `chmod 600 ~/.ssh/id_ed25519` |
 | Sleutel wordt genegeerd, zonder melding | `sshd` weigert `~/.ssh` bij te ruime rechten: `chmod 700 ~/.ssh` |
 | `Could not resolve hostname kdg-compute` | Je hebt stap 2 niet gedraaid — gebruik het volledige adres |
 | De test in stap 7 faalt | Normaal als je een passphrase op je sleutel zette; test met `ssh kdg-compute` |
-| Portal onbereikbaar, tunnel staat open | FoxyProxy staat uit, of de naam wordt lokaal opgezocht (zie stap 5) |
+| Je job blijft in `PD` staan in `squeue` | De cluster is bezet, of je vraagt meer dan er is. `sinfo` toont wat vrij is |
+| Portal onbereikbaar, tunnel staat open | FoxyProxy staat uit, of de naam wordt lokaal opgezocht (zie 5.3) |
 
-Lukt het niet? Open een issue met de **volledige uitvoer** van het script erbij —
-die bevat geen geheimen.
+Lukt het niet? Open een
+[issue](https://github.com/KdG-OCDI/hpc-public/issues) of stuur een mail naar
+[compute@kdg.be](mailto:compute@kdg.be), met de **volledige uitvoer** van het
+script erbij — die bevat geen geheimen.
 
 ---
 

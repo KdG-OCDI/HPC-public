@@ -160,59 +160,6 @@ else
   warn "Als je sleutel een passphrase heeft, is dit normaal. Probeer handmatig: ssh $ALIAS"
 fi
 
-# ------------------------------------------- 8. Initieel wachtwoord vervangen
-step "Initieel wachtwoord vervangen (aanbevolen)"
-info "Je sleutel werkt nu. Voor SSH heb je het wachtwoord niet meer nodig,"
-info "maar het blijft je noodingang. Vervang het startwachtwoord dus door"
-info "een sterk, uniek wachtwoord en bewaar dat in je passwordmanager."
-printf '    Nu een sterk wachtwoord genereren? [J/n] '
-if [ -r /dev/tty ]; then read -r answer < /dev/tty; else read -r answer; fi
-
-case "${answer:-j}" in
-  [JjYy]*|'')
-    # CSPRNG. pipefail staat uit in de subshell: head sluit de pipe vroeg af,
-    # waardoor tr een SIGPIPE krijgt en de pipeline anders zou "falen".
-    NEWPW="$(set +o pipefail; LC_ALL=C tr -dc 'A-Za-z0-9_.!@#%+=-' < /dev/urandom | head -c 24)"
-    [ "${#NEWPW}" -eq 24 ] || die "Kon geen wachtwoord genereren."
-
-    clipped=""
-    if   command -v pbcopy  >/dev/null 2>&1; then printf '%s' "$NEWPW" | pbcopy  && clipped=1
-    elif command -v wl-copy >/dev/null 2>&1; then printf '%s' "$NEWPW" | wl-copy && clipped=1
-    elif command -v xclip   >/dev/null 2>&1; then printf '%s' "$NEWPW" | xclip -selection clipboard && clipped=1
-    fi
-
-    echo
-    printf '    %sNieuw wachtwoord:%s %s\n' "$C_HDR" "$C_OFF" "$NEWPW"
-    [ -n "$clipped" ] && info "(ook naar je klembord gekopieerd)"
-    echo
-    warn "Bewaar dit NU in je passwordmanager. Het staat in je terminal-"
-    warn "geschiedenis, dus sluit dit venster daarna."
-    echo
-    info "De server vraagt zo eerst je HUIDIGE (initiele) wachtwoord,"
-    info "daarna tweemaal het nieuwe. Plakken werkt; typen mag ook."
-    echo
-
-    # stdin expliciet van de terminal: bij `curl ... | bash` is stdin de download.
-    rc=0
-    if [ -r /dev/tty ]; then
-      ssh -t "$ALIAS" passwd < /dev/tty || rc=$?
-    else
-      ssh -t "$ALIAS" passwd || rc=$?
-    fi
-
-    if [ "$rc" -eq 0 ]; then
-      ok "Wachtwoord gewijzigd"
-    else
-      warn "Wachtwoord wijzigen is niet gelukt. Je sleutel werkt nog steeds."
-      warn "Probeer later opnieuw met: ssh $ALIAS passwd"
-    fi
-    unset NEWPW
-    ;;
-  *)
-    info "Overgeslagen. Wijzig het later met: ssh $ALIAS passwd"
-    ;;
-esac
-
 printf '
   %sKlaar.%s
 
@@ -220,4 +167,5 @@ printf '
 echo "  Terminal      : ssh $ALIAS"
 echo "  VS Code/Cursor: Remote-SSH: Connect to Host... > $ALIAS"
 echo "  PyCharm       : Settings > Tools > SSH Configurations > $ALIAS"
-printf '\n  %sVergeet niet je initiele wachtwoord te wijzigen met '"'"'passwd'"'"' op de server.%s\n\n' "$C_WARN" "$C_OFF"
+printf '\n  %sBewaar de mail met je wachtwoord: die heb je nodig als je ooit je%s\n' "$C_DIM" "$C_OFF"
+printf '  %ssleutel kwijt bent. Om in te loggen heb je hem niet meer nodig.%s\n\n' "$C_DIM" "$C_OFF"

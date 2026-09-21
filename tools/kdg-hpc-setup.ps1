@@ -174,66 +174,13 @@ if ($testText -match 'LOGIN_OK') {
 }
 
 Write-Host ""
-# ------------------------------------------ 8. Initieel wachtwoord vervangen
-Write-Step "Initieel wachtwoord vervangen (aanbevolen)"
-Write-Info "Je sleutel werkt nu. Voor SSH heb je het wachtwoord niet meer nodig,"
-Write-Info "maar het blijft je noodingang. Vervang het startwachtwoord dus door"
-Write-Info "een sterk, uniek wachtwoord en bewaar dat in je passwordmanager."
-
-function New-StrongPassword {
-    param([int]$Length = 24)
-    # Cryptografisch veilige generator met rejection sampling: bytes boven de
-    # laatste volledige veelvoud van de alfabetlengte worden weggegooid, anders
-    # zouden de eerste tekens van het alfabet vaker voorkomen (modulo-bias).
-    $chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_.!@#%+='
-    $max   = [math]::Floor(256 / $chars.Length) * $chars.Length
-    $rng   = [System.Security.Cryptography.RandomNumberGenerator]::Create()
-    try {
-        $byte = New-Object byte[] 1
-        $sb   = New-Object System.Text.StringBuilder
-        while ($sb.Length -lt $Length) {
-            $rng.GetBytes($byte)
-            if ($byte[0] -lt $max) { [void]$sb.Append($chars[$byte[0] % $chars.Length]) }
-        }
-        $sb.ToString()
-    } finally { $rng.Dispose() }
-}
-
-$answer = Read-Host "    Nu een sterk wachtwoord genereren? [J/n]"
-if ($answer -eq '' -or $answer -match '^[JjYy]') {
-    $newPw = New-StrongPassword -Length 24
-    $clipped = $false
-    try { Set-Clipboard -Value $newPw -ErrorAction Stop; $clipped = $true } catch { }
-
-    Write-Host ""
-    Write-Host "    Nieuw wachtwoord: " -NoNewline -ForegroundColor White
-    Write-Host $newPw -ForegroundColor White
-    if ($clipped) { Write-Info "(ook naar je klembord gekopieerd)" }
-    Write-Host ""
-    Write-Warn2 "Bewaar dit NU in je passwordmanager. Het staat in je terminal-"
-    Write-Warn2 "geschiedenis, dus sluit dit venster daarna."
-    Write-Host ""
-    Write-Info "De server vraagt zo eerst je HUIDIGE (initiele) wachtwoord,"
-    Write-Info "daarna tweemaal het nieuwe. Plakken met rechtermuisknop werkt."
-    Write-Host ""
-
-    ssh -t $Alias passwd
-    if ($LASTEXITCODE -eq 0) {
-        Write-Ok "Wachtwoord gewijzigd"
-    } else {
-        Write-Warn2 "Wachtwoord wijzigen is niet gelukt. Je sleutel werkt nog steeds."
-        Write-Warn2 "Probeer later opnieuw met: ssh $Alias passwd"
-    }
-    $newPw = $null
-} else {
-    Write-Info "Overgeslagen. Wijzig het later met: ssh $Alias passwd"
-}
-
 Write-Host "  Klaar." -ForegroundColor Green
 Write-Host ""
 Write-Host "  Terminal      : ssh $Alias"
 Write-Host "  VS Code/Cursor: Remote-SSH: Connect to Host... > $Alias"
 Write-Host "  PyCharm       : Settings > Tools > SSH Configurations > $Alias"
 Write-Host ""
-Write-Host "  Vergeet niet je initiele wachtwoord te wijzigen met 'passwd' op de server." -ForegroundColor Yellow
+Write-Host ""
+Write-Host "  Bewaar de mail met je wachtwoord: die heb je nodig als je ooit je" -ForegroundColor DarkGray
+Write-Host "  sleutel kwijt bent. Om in te loggen heb je hem niet meer nodig." -ForegroundColor DarkGray
 Write-Host ""
