@@ -32,11 +32,44 @@ cd /trinity/home/$USER
 mkdir mijn-project && cd mijn-project
 uv init
 uv add numpy pandas
+```
+
+`uv` maakt in die map een `.venv` aan met je pakketten erin.
+
+### Open die map nu in je editor
+
+Dit is de stap die het verschil maakt, en die makkelijk overgeslagen wordt.
+
+In **VS Code of Cursor**: *File → Open Folder* →
+`/trinity/home/jouw_accountnaam/mijn-project`. Dus de projectmap zelf, niet je
+home.
+
+Daarna kies je de omgeving die `uv` heeft aangemaakt: `Ctrl+Shift+P` →
+*Python: Select Interpreter* → de `.venv` in je project.
+
+Vanaf dat moment klopt alles bij elkaar: je terminal opent in de projectmap,
+autocompletion en debuggen gebruiken dezelfde pakketten als je script, en een
+notebook dat je in VS Code opent draait in dezelfde omgeving. Open je alleen je
+home, dan zoekt VS Code een Python zonder je pakketten en lijkt elke `import`
+te ontbreken.
+
+In **PyCharm** open je het project op dezelfde manier, en wijs je de `.venv`
+aan als interpreter.
+
+### Je code draaien
+
+```bash
 uv run python mijn_script.py
 ```
 
 `uv run` zorgt dat je script de pakketten uit dit project gebruikt, zonder dat
 je een omgeving hoeft te activeren.
+
+> **Let op waar dit draait.** Je terminal staat op de loginnode, dus dit
+> commando draait daar ook. Prima om te controleren of je script start of om
+> iets kleins uit te proberen, maar niet voor echt rekenwerk: die ene machine
+> is van iedereen. Zodra het meer dan een paar seconden duurt, dien je het in
+> als [job](slurm.md).
 
 Een andere Python-versie voor dit project:
 

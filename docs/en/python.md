@@ -33,11 +33,44 @@ cd /trinity/home/$USER
 mkdir my-project && cd my-project
 uv init
 uv add numpy pandas
+```
+
+`uv` creates a `.venv` in that directory with your packages in it.
+
+### Now open that folder in your editor
+
+This is the step that makes the difference, and the one most easily skipped.
+
+In **VS Code or Cursor**: *File → Open Folder* →
+`/trinity/home/your_username/my-project`. The project directory itself, not
+your home.
+
+Then pick the environment `uv` created: `Ctrl+Shift+P` →
+*Python: Select Interpreter* → the `.venv` inside your project.
+
+From that point everything lines up: your terminal opens in the project
+directory, autocompletion and debugging use the same packages as your script,
+and a notebook you open in VS Code runs in the same environment. Open only your
+home and VS Code finds a Python without your packages, making every `import`
+look broken.
+
+In **PyCharm**, open the project the same way and point the interpreter at the
+`.venv`.
+
+### Running your code
+
+```bash
 uv run python my_script.py
 ```
 
 `uv run` makes sure your script uses this project's packages, without you
 having to activate an environment.
+
+> **Mind where this runs.** Your terminal is on the login node, so this command
+> runs there too. Fine for checking that your script starts, or trying
+> something small, but not for real computing: that one machine belongs to
+> everyone. As soon as it takes more than a few seconds, submit it as a
+> [job](slurm.md).
 
 A different Python version for this project:
 
