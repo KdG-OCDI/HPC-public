@@ -96,6 +96,49 @@ Typische adressen, zodra je de poort hebt doorgestuurd:
 > dan `node002:8888` in plaats van alleen het poortnummer. VS Code stuurt dan
 > door naar die node, via de loginnode.
 
+### Zonder VS Code: een tunnel met ssh
+
+Werk je niet in VS Code, dan doe je hetzelfde met één commando. Laat dat
+venster openstaan zolang je de dienst gebruikt:
+
+```bash
+ssh -L 5000:login01:5000 kdg-compute
+```
+
+De vorm van `-L` is:
+
+```
+ssh -L <poort bij jou>:<host vanaf de cluster>:<poort daar> kdg-compute
+        └─ kies je zelf      └─ wordt pas aan de overkant opgezocht
+```
+
+Drie dingen die het meestal ophelderen:
+
+- **Alleen het eerste getal kies je zelf.** Dat is de poort op je eigen
+  machine; in je browser of je code gebruik je altijd `localhost:<dat getal>`.
+- **De naam in het midden wordt op de cluster opgezocht**, niet bij jou.
+  Daarom kan je daar `node002` schrijven terwijl je laptop die machine niet
+  eens kent — login01 legt de rest van de weg af.
+- Je ziet vaak `localhost` in het midden staan. Dat werkt (vanaf login01 is
+  `localhost` gewoon login01), maar `login01` schrijven leest duidelijker:
+  dan staat er letterlijk waar je uitkomt.
+
+| Commando | Wat je krijgt |
+|---|---|
+| `-L 5000:login01:5000` | `localhost:5000` bij jou is MLflow op de loginnode |
+| `-L 15000:login01:5000` | idem, maar op poort 15000 — handig als 5000 bij jou bezet is |
+| `-L 8888:node002:8888` | `localhost:8888` bij jou is poort 8888 op **node002** |
+
+Die laatste is de interessante: zo bereik je een server die je zelf in een job
+op een compute node hebt gestart, bijvoorbeeld een vLLM-server.
+
+Meerdere poorten in één keer kan ook, gewoon door `-L` te herhalen:
+
+```bash
+ssh -L 5000:login01:5000 -L 9001:login01:9001 -L 8265:login01:8265 kdg-compute
+```
+
+
 ---
 
 ## Vanuit een job erbij

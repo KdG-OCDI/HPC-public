@@ -64,12 +64,13 @@ loginnode.
 
 Het kan ook zonder Remote-SSH, rechtstreeks vanuit een notebook of script op je
 eigen machine. Je hebt dan twee dingen nodig: de **VPN** aan, en een **tunnel**
-naar de cluster, want poort 10001 is van buitenaf niet bereikbaar.
+naar de cluster, want poort 10001 is van buitenaf niet bereikbaar. Hoe je zo'n
+regel leest staat bij [containers](containers.md#zonder-vs-code-een-tunnel-met-ssh).
 
 Laat dit venster openstaan zolang je werkt:
 
 ```bash
-ssh -L 10001:localhost:10001 -L 8265:localhost:8265 kdg-compute
+ssh -L 10001:login01:10001 -L 8265:login01:8265 kdg-compute
 ```
 
 In je code gebruik je dan `localhost` in plaats van `login01`, en je stuurt je
