@@ -13,18 +13,21 @@ environment and the packages in one. The environment belongs to the directory
 rather than to your shell — so it travels to whichever compute node runs your
 job.
 
-Check whether it is already there:
-
-```bash
-which uv
-```
-
-If not, install it once, in your own directory:
+Install it once, in your own directory:
 
 ```bash
 curl -LsSf https://astral.sh/uv/install.sh | sh
 source ~/.bashrc
 ```
+
+> There is also a `uv` on the cluster itself, in `/usr/local/bin`. That one is
+> for background processes — Ray uses it to build your environment on every
+> node. Install your own anyway: then you decide when you change version,
+> rather than a system update changing your projects under you. Yours takes
+> precedence, because `~/.local/bin` comes first in your PATH.
+>
+> To check which one you are using: `which uv` should show your own directory,
+> not `/usr/local/bin`.
 
 Setting up a project:
 

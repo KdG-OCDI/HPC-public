@@ -26,12 +26,13 @@ Here it simply runs, so your code connects and gets going.
 
 ## Setting up your project
 
-One thing is strict: **your Ray version must be exactly 2.55.1.** Client and
-cluster speak a protocol that changes between versions; 2.44 or 2.56 will be
-refused. So pin it in your project:
+Two things have to match the cluster exactly, or the connection is refused:
+the **Ray version** and the **Python version**. Ray compares both down to the
+last digit.
 
 ```bash
 cd /trinity/home/$USER/projects/my-project
+uv python pin 3.12.13
 uv add "ray[client]==2.55.1"
 ```
 
@@ -52,8 +53,17 @@ uv add ipykernel ipywidgets
 `ipywidgets` is what Ray uses to show the progress of your tasks. If something
 still asks for `pip`, `uv add pip` settles it.
 
-It all ends up in your `pyproject.toml`, so anyone who clones your project gets
-the same versions without having to know about them.
+It all ends up in your `pyproject.toml` and `.python-version`, so anyone who
+clones your project gets the same versions without having to know about them.
+
+> If the Python version does not match, the cluster says so immediately:
+>
+> ```
+> Version mismatch: The cluster was started with Python: 3.12.13
+> This process was started with Python: 3.12.11
+> ```
+>
+> `uv python pin 3.12.13` and try again.
 
 ---
 
@@ -145,6 +155,16 @@ Run it:
 ```bash
 uv run python hello_ray.py
 ```
+
+> **What `uv run` adds here.** It tells the cluster to start the workers with
+> `uv run` as well. Each node then builds your project environment from your
+> `pyproject.toml` — your packages travel along without you listing them
+> anywhere. You can see it happen in the output: *Installed 20 packages in
+> 321ms* on a node.
+>
+> For that, your Python version has to match exactly; see above. If you would
+> rather not, run `./.venv/bin/python hello_ray.py` instead — that works too,
+> but a worker then only has what the cluster already provides.
 
 You should see something like:
 
