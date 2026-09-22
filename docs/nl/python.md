@@ -12,18 +12,22 @@ Hoe je een project opzet met zijn eigen Python en zijn eigen pakketten.
 en de pakketten in één. De omgeving hangt aan de map, niet aan je shell — dus
 hij reist mee naar de compute node waar je job draait.
 
-Kijk eerst of het al klaarstaat:
-
-```bash
-which uv
-```
-
-Zo niet, dan installeer je het eenmalig in je eigen map:
+Installeer hem eenmalig in je eigen map:
 
 ```bash
 curl -LsSf https://astral.sh/uv/install.sh | sh
 source ~/.bashrc
 ```
+
+> Er staat ook een `uv` op de cluster zelf, in `/usr/local/bin`. Die is er voor
+> achtergrondprocessen — Ray gebruikt hem om op elke node jouw omgeving op te
+> bouwen. Installeer toch je eigen: dan bepaal jij wanneer je van versie
+> wisselt, in plaats van dat een systeemupdate je projecten onder je handen
+> verandert. Je eigen versie heeft voorrang, want `~/.local/bin` staat vooraan
+> in je PATH.
+>
+> Controleren welke je gebruikt: `which uv` moet je eigen map tonen, niet
+> `/usr/local/bin`.
 
 Een project opzetten:
 
