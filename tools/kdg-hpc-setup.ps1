@@ -146,7 +146,7 @@ Write-Step "~/.ssh/config bijwerken"
 $cfgPath = Join-Path $sshDir 'config'
 $begin = "# >>> $Alias (KdG HPC) >>>"
 $end   = "# <<< $Alias (KdG HPC) <<<"
-$keyForCfg = $KeyPath -replace '\','/'
+$keyForCfg = $KeyPath.Replace([char]92, [char]47)
 
 $block = @"
 $begin
