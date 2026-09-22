@@ -141,8 +141,6 @@ sneller, maar geconcentreerd op een paar machines.
 
 ---
 
----
-
 ## Een actor: iets dat blijft staan
 
 Een `@ray.remote`-functie begint elke keer opnieuw. Soms wil je dat niet — je
@@ -221,6 +219,8 @@ Voor bestanden werkt het net zo: `--working-dir .` bij `ray job submit` stuurt
 je projectmap mee. Binnen deze cluster heb je dat meestal niet nodig, want
 `/trinity/home` staat op elke node — dat scheelt kopiëren.
 
+---
+
 ## Het dashboard
 
 `http://login01:8265` toont wat er draait, per node en per taak. Je komt er via
@@ -244,8 +244,6 @@ opvragen, en zonder dat jouw machine verbonden hoeft te blijven.
 
 ---
 
----
-
 ## Er is meer dan taken en actors
 
 Dit zijn de twee bouwstenen waar de rest op staat. Daarboven heeft Ray
@@ -261,6 +259,8 @@ bibliotheken voor werk dat je anders zelf zou schrijven:
 Ze gebruiken dezelfde cluster en dezelfde verbinding als hierboven. Ray Tune
 op zestien GPU's is waarschijnlijk het punt waarop deze cluster zich voor jou
 terugbetaalt — dat is werk dat op één machine dagen kost.
+
+---
 
 ## Waarom Ray en niet Slurm
 

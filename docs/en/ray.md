@@ -140,8 +140,6 @@ concentrated on a few machines.
 
 ---
 
----
-
 ## An actor: something that stays
 
 A `@ray.remote` function starts fresh every time. Sometimes that is not what
@@ -219,6 +217,8 @@ Files work the same way: `--working-dir .` sends your project directory along
 with `ray job submit`. Inside this cluster you rarely need it, because
 `/trinity/home` is on every node — which saves the copying.
 
+---
+
 ## The dashboard
 
 `http://login01:8265` shows what is running, per node and per task. Reach it
@@ -243,8 +243,6 @@ later, and no need for your machine to stay connected.
 
 ---
 
----
-
 ## There is more than tasks and actors
 
 Those two are the building blocks everything else rests on. Above them, Ray has
@@ -260,6 +258,8 @@ libraries for work you would otherwise write yourself:
 They use the same cluster and the same connection as above. Ray Tune on sixteen
 GPUs is probably the point where this cluster pays for itself — that is work
 which takes days on a single machine.
+
+---
 
 ## Why Ray and not Slurm
 
