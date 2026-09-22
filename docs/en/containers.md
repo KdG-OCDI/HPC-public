@@ -116,22 +116,20 @@ script — see [environment variables](slurm.md#environment-variables).
 
 ---
 
-## On a compute node: Apptainer
+## On a compute node: not yet
 
 If you need a container for the computing itself, Docker is not an option
-there: no daemon runs on the nodes, and it would run as root. **Apptainer**
-(formerly Singularity) does the same job as your own user, with your
-permissions and your home directory.
+there: no daemon runs on the compute nodes, and it would run as root. The
+usual answer on a cluster is **Apptainer** (formerly Singularity) or
+**Podman** — both run as your own user, with your permissions.
 
-Converting and using an existing Docker image:
+**Neither is available on this cluster.** Only `node008` has Podman. If you
+need containers inside a job, mail [compute@kdg.be](mailto:compute@kdg.be)
+with what you want to run — that helps decide which of the two it becomes.
 
-```bash
-apptainer build my-image.sif docker://python:3.12
-apptainer exec --nv my-image.sif python my_script.py
-```
-
-`--nv` gives the container access to the node's GPUs. A `.sif` is a single file
-in your project directory, so every node sees it at once.
+In the meantime: Python work rarely needs a container. An environment built
+with [uv](python.md) lives on shared storage and is therefore identical on
+every node — which is exactly what a container would buy you here.
 
 ---
 
