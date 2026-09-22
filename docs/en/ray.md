@@ -143,8 +143,15 @@ for machine, count in sorted(Counter(results).items()):
 Run it:
 
 ```bash
-uv run python hello_ray.py
+./.venv/bin/python hello_ray.py
 ```
+
+> **Not with `uv run`.** Everywhere else in this documentation you start a
+> script with `uv run python ...`, but with the Ray Client that breaks. `uv
+> run` tells the cluster "start your workers with `uv run` too", and that
+> command does not exist there. You get a `ConnectionAbortedError` saying
+> *Starting Ray client server failed*, with an empty log file to show for it.
+> Notebooks are unaffected: the kernel already is that python.
 
 You should see something like:
 

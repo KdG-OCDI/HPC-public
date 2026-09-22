@@ -142,8 +142,15 @@ for machine, aantal in sorted(Counter(resultaten).items()):
 Draaien:
 
 ```bash
-uv run python hallo_ray.py
+./.venv/bin/python hallo_ray.py
 ```
+
+> **Let op: niet met `uv run`.** Overal elders in deze documentatie start je
+> een script met `uv run python ...`, maar bij de Ray Client gaat dat mis.
+> `uv run` vertelt de cluster namelijk "start je workers ook met `uv run`", en
+> dat commando bestaat daar niet. Je krijgt dan een `ConnectionAbortedError`
+> met *Starting Ray client server failed*, en een leeg logbestand om het mee te
+> doen. In een notebook speelt dit niet: de kernel ís al die python.
 
 Je ziet zoiets:
 
