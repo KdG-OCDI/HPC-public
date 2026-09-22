@@ -59,7 +59,7 @@ bestand `job.sh` in je projectmap:
 #SBATCH --output=slurm-%j.out
 #SBATCH --error=slurm-%j.err
 
-cd /trinity/home/$USER/mijn-project
+cd /trinity/home/$USER/projects/mijn-project
 uv run python hello.py
 ```
 
@@ -132,7 +132,7 @@ gedeelde opslag, dus elke node ziet dat bestand al. Je moet hem alleen laten
 inlezen:
 
 ```bash
-cd /trinity/home/$USER/mijn-project
+cd /trinity/home/$USER/projects/mijn-project
 uv run --env-file .env python hello.py
 ```
 
@@ -254,7 +254,7 @@ wat je toevallig had geactiveerd. Daarom begint het voorbeeld hierboven met een
 `python hello.py`:
 
 ```bash
-cd /trinity/home/$USER/mijn-project
+cd /trinity/home/$USER/projects/mijn-project
 uv run python hello.py
 ```
 

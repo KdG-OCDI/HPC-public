@@ -31,7 +31,7 @@ praten een protocol dat tussen versies verandert; met 2.44 of 2.56 weigert de
 verbinding. Daarom zet je hem vast in je project:
 
 ```bash
-cd /trinity/home/$USER/mijn-project
+cd /trinity/home/$USER/projects/mijn-project
 uv add "ray==2.55.1"
 ```
 

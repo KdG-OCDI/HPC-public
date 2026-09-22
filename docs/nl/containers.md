@@ -50,7 +50,7 @@ zelf) ernaast. Die beheert niets, maar controleert je `Dockerfile` en
 Zet je `compose.yaml` in je projectmap, zoals de rest van je project:
 
 ```bash
-cd /trinity/home/$USER/mijn-project
+cd /trinity/home/$USER/projects/mijn-project
 docker compose up -d
 docker compose ps
 docker compose logs -f mlflow

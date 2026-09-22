@@ -28,7 +28,8 @@ source ~/.bashrc
 Een project opzetten:
 
 ```bash
-cd /trinity/home/$USER
+mkdir -p /trinity/home/$USER/projects
+cd /trinity/home/$USER/projects
 mkdir mijn-project && cd mijn-project
 uv init
 uv add numpy pandas
@@ -41,7 +42,7 @@ uv add numpy pandas
 Dit is de stap die het verschil maakt, en die makkelijk overgeslagen wordt.
 
 In **VS Code of Cursor**: *File → Open Folder* →
-`/trinity/home/jouw_accountnaam/mijn-project`. Dus de projectmap zelf, niet je
+`/trinity/home/jouw_accountnaam/projects/mijn-project`. Dus de projectmap zelf, niet je
 home.
 
 Daarna kies je de omgeving die `uv` heeft aangemaakt: `Ctrl+Shift+P` →

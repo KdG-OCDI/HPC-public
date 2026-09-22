@@ -37,9 +37,14 @@ same files and the same Python as your code.
 **Your terminal is on the login node.** That is the place to edit files and
 submit work, not to compute. See [Slurm](slurm.md).
 
-**Notebooks work here too.** Open a `.ipynb` in VS Code and pick your
-[uv environment](python.md) as the kernel. That gives you a notebook with no
-tunnel and no portal.
+**You can run notebooks here too.** Open a `.ipynb` in VS Code and pick your
+[uv environment](python.md) as the kernel. You then work in a notebook without
+needing the portal and the tunnel from step 5.
+
+Do mind where such a notebook runs: on the login node, like your terminal. Fine
+for trying something out or drawing a chart, but as soon as a cell computes for
+more than a few seconds, that work belongs in a [job](slurm.md) or on the [Ray
+cluster](ray.md).
 
 ---
 
@@ -58,6 +63,24 @@ PyCharm Professional has this built in; the Community edition does not.
 
 Work in your own directory under `/trinity/home/`. It lives on shared storage
 and is therefore visible on whichever node your job lands.
+
+**Give every project its own directory**, and keep them together under one
+`projects` directory:
+
+```
+/trinity/home/your_username/
+└── projects/
+    ├── thesis/            ← its own .venv, its own pyproject.toml
+    ├── image-recognition/ ← its own .venv
+    └── exercises/
+```
+
+This is not tidiness for its own sake: [uv](python.md) creates a `.venv` per
+project directory, with its own package versions. Throw everything into your
+home and you get one environment in which one project undermines the next as
+soon as two packages need different versions. And in VS Code you open that one
+project directory, not your home — otherwise the editor cannot find your
+environment.
 
 Files you put outside it on one node — in `/tmp`, say — cannot be seen
 elsewhere. A job running on another node will not find them.

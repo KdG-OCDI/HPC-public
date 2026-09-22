@@ -31,7 +31,7 @@ cluster speak a protocol that changes between versions; 2.44 or 2.56 will be
 refused. So pin it in your project:
 
 ```bash
-cd /trinity/home/$USER/my-project
+cd /trinity/home/$USER/projects/my-project
 uv add "ray==2.55.1"
 ```
 

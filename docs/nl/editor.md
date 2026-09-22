@@ -36,9 +36,14 @@ bestanden en dezelfde Python als je code.
 **Je terminal staat op de loginnode.** Dat is de plek om bestanden te bewerken
 en werk in te dienen, niet om te rekenen. Zie [Slurm](slurm.md).
 
-**Notebooks werken ook hier.** Open een `.ipynb` in VS Code en kies je
-[uv-omgeving](python.md) als kernel. Dan heb je een notebook zonder tunnel en
-zonder portal.
+**Je kan hier ook notebooks draaien.** Open een `.ipynb` in VS Code en kies je
+[uv-omgeving](python.md) als kernel. Je werkt dan in een notebook zonder dat je
+de portal en de tunnel uit stap 5 nodig hebt.
+
+Let wel op waar zo'n notebook draait: op de loginnode, net als je terminal.
+Prima dus om iets uit te proberen of een grafiek te maken, maar zodra een cel
+langer dan een paar seconden rekent, hoort dat werk in een [job](slurm.md) of
+op de [Ray-cluster](ray.md).
 
 ---
 
@@ -57,6 +62,23 @@ PyCharm Professional heeft dit ingebouwd; de Community-editie niet.
 
 Werk in je eigen map onder `/trinity/home/`. Die staat op gedeelde opslag en is
 dus zichtbaar op elke node waar je job terechtkomt.
+
+**Geef elk project zijn eigen map**, en zet die samen onder één `projects`-map:
+
+```
+/trinity/home/jouw_accountnaam/
+└── projects/
+    ├── scriptie/          ← eigen .venv, eigen pyproject.toml
+    ├── beeldherkenning/   ← eigen .venv
+    └── oefeningen/
+```
+
+Dat is geen ordelijkheid om de ordelijkheid: [uv](python.md) maakt per
+projectmap een eigen `.venv` met eigen pakketversies. Gooi je alles in je home,
+dan krijg je één omgeving waarin het ene project het andere ondermijnt zodra
+twee pakketten een verschillende versie nodig hebben. En in VS Code open je
+telkens die ene projectmap, niet je home — anders vindt de editor je omgeving
+niet.
 
 Bestanden die je daarbuiten op één node neerzet — in `/tmp` bijvoorbeeld — zijn
 elders niet te zien. Een job die op een andere node draait vindt ze dan niet.
