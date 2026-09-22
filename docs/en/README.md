@@ -203,7 +203,7 @@ with whatever you need.
 | **[Working in your own editor](editor.md)** | Daily work, with your own extensions and shortcuts | VS Code, Cursor or PyCharm |
 | **[Python, packages and git](python.md)** | Setting up a per-project environment | The terminal |
 | **[Submitting work with Slurm](slurm.md)** | Work too heavy for the login node | Understanding of a queue |
-| **[Distributed computing with Ray](ray.md)** | Work across several machines at once | A project with `ray==2.55.1` |
+| **[Distributed computing with Ray](ray.md)** | Work across several machines at once | A project with `ray[client]==2.55.1` |
 | **[Running services in containers](containers.md)** | MLflow, Postgres, MinIO, LakeFS — alongside your computing | Docker on the login node |
 
 Not sure where to start: [your own editor](editor.md) is what most people here

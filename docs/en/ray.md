@@ -32,10 +32,28 @@ refused. So pin it in your project:
 
 ```bash
 cd /trinity/home/$USER/projects/my-project
-uv add "ray==2.55.1"
+uv add "ray[client]==2.55.1"
 ```
 
-That puts it in your `pyproject.toml`, so nobody has to remember it.
+Mind the **`[client]`**. Without it you get the minimal Ray, and you only find
+out when you try to connect:
+
+```
+ValueError: Ray Client requires pip package `ray[client]`.
+```
+
+Working in a notebook needs two more:
+
+```bash
+uv add ipykernel ipywidgets
+```
+
+`ipykernel` turns your environment into a kernel VS Code can select;
+`ipywidgets` is what Ray uses to show the progress of your tasks. If something
+still asks for `pip`, `uv add pip` settles it.
+
+It all ends up in your `pyproject.toml`, so anyone who clones your project gets
+the same versions without having to know about them.
 
 ---
 
@@ -88,7 +106,7 @@ it along and unpacks it there.
 > `/trinity/home` or in MinIO and let your tasks read them there. `.gitignore`
 > is respected, so a `.venv` does not travel.
 
-The version requirement holds here too: `ray==2.55.1`, on Windows as well.
+The version requirement holds here too: `ray[client]==2.55.1`, on Windows as well.
 
 ---
 
@@ -281,12 +299,20 @@ later, and no need for your machine to stay connected.
 Those two are the building blocks everything else rests on. Above them, Ray has
 libraries for work you would otherwise write yourself:
 
-| | For |
-|---|---|
-| **[Ray Data](https://docs.ray.io/en/latest/data/data.html)** | reading and transforming large datasets, spread across the nodes |
-| **[Ray Train](https://docs.ray.io/en/latest/train/train.html)** | training a model across several GPUs, with PyTorch or TensorFlow |
-| **[Ray Tune](https://docs.ray.io/en/latest/tune/index.html)** | hyperparameter search: hundreds of variants at once |
-| **[Ray Serve](https://docs.ray.io/en/latest/serve/index.html)** | serving a trained model as an API |
+| | For | Also install |
+|---|---|---|
+| **[Ray Data](https://docs.ray.io/en/latest/data/data.html)** | reading and transforming large datasets, spread across the nodes | `ray[data]` |
+| **[Ray Train](https://docs.ray.io/en/latest/train/train.html)** | training a model across several GPUs, with PyTorch or TensorFlow | `ray[train]` |
+| **[Ray Tune](https://docs.ray.io/en/latest/tune/index.html)** | hyperparameter search: hundreds of variants at once | `ray[tune]` |
+| **[Ray Serve](https://docs.ray.io/en/latest/serve/index.html)** | serving a trained model as an API | `ray[serve]` |
+
+Each of those is a separate extra at install time; `ray[client]` on its own
+gives you tasks and actors and nothing more. You can combine them in one go,
+and the version has to stay the same everywhere:
+
+```bash
+uv add "ray[client,data,train]==2.55.1"
+```
 
 They use the same cluster and the same connection as above. Ray Tune on sixteen
 GPUs is probably the point where this cluster pays for itself — that is work
