@@ -127,71 +127,39 @@ ssh kdg-compute passwd
 
 ---
 
-## 5. Toegang tot de webportal
+## 5. De webportal
 
 Alleen nodig als je de portal wil gebruiken, bijvoorbeeld voor een
 [Jupyter-notebook in je browser](jupyter.md). Werk je liever in je eigen
 editor, dan kun je dit hoofdstuk overslaan.
 
-De portal draait op een adres dat alleen binnen het clusternetwerk bestaat. Je
-browser kan die naam niet vinden, ook niet met VPN. Daarom stuur je je
-browserverkeer door een tunnel die de naam aan de clusterkant laat opzoeken.
+Zet de VPN aan (of gebruik het KdG-netwerk) en ga naar:
 
-### Stap 1 — open de tunnel
+**[https://datalab.kdg.be:8080](https://datalab.kdg.be:8080)**
 
-```bash
-ssh -N -D 9090 kdg-compute
-```
-
-Dit commando blokkeert en geeft geen uitvoer. Dat hoort zo: laat het venster
-open zolang je de portal gebruikt. Elk poortnummer boven 1024 mag in plaats van
-9090.
-
-### Stap 2 — stuur je browser door de tunnel
-
-Gebruik hiervoor [FoxyProxy](https://addons.mozilla.org/nl/firefox/addon/foxyproxy-standard/),
-beschikbaar voor Firefox, Chrome en Edge. Het kan ook via de instellingen van
-je besturingssysteem, maar dan gaat **al** je internetverkeer door de cluster —
-inclusief je gewone browsen. FoxyProxy laat je het beperken tot alleen het
-clusteradres.
-
-Maak een proxy aan van het type **SOCKS5**, met host `localhost` en poort
-`9090`:
-
-![FoxyProxy-instellingen](../../images/foxyproxy.png)
-
-Voeg daarna een regel toe van het type *wildcard* met dit patroon, en kies
-**Proxy by Patterns**:
-
-```
-://controller1.cluster:*
-```
-
-![FoxyProxy-patronen](../../images/foxyproxy_patterns.png)
-
-> **Belangrijk bij SOCKS5:** de naam `controller1.cluster` moet aan de
-> clusterkant opgezocht worden, niet op je laptop. In Firefox is dat het
-> aanvinkvakje *Proxy DNS when using SOCKS v5*; FoxyProxy zet dat zelf goed.
-> Doe je het via je systeeminstellingen, dan werkt het vaak niet om precies
-> deze reden.
-
-### Stap 3 — open de portal
-
-Ga naar [https://controller1.cluster:8080](https://controller1.cluster:8080) en
-klik op **Azure SSO Login** om met je schoolaccount aan te melden.
+Klik op **Azure SSO Login** en meld je aan met je schoolaccount. Verder niets:
+geen tunnel, geen browser-extensie.
 
 ![Aanmeldpagina](../../images/login_page.png)
+
+> **Je browser waarschuwt over het certificaat.** Klik op *Geavanceerd* en ga
+> toch verder. Het certificaat van de server staat nog op een oude naam; er is
+> een nieuw aangevraagd. Je verbinding is wel degelijk versleuteld — alleen kan
+> je browser niet bevestigen wie er aan de andere kant zit, en binnen het
+> KdG-netwerk is dat een aanvaardbaar risico.
 
 Je bent nu binnen. Wat je er kunt doen staat in
 [Een Jupyter-notebook via de portal](jupyter.md).
 
-### Als je klaar bent
+### Je eerste keer
 
-Sluit de tunnel met `Ctrl+C` en zet FoxyProxy weer uit.
+Heb je nog geen account op de cluster, dan maakt de portal er bij je eerste
+aanmelding zelf een aan, op basis van je schoolaccount. Je hebt dus geen
+accountnaam of wachtwoord nodig om binnen te raken.
 
-> Dit hele hoofdstuk verdwijnt zodra de portal een adres krijgt dat over de VPN
-> werkt. Dan typ je gewoon een adres in je browser, zonder tunnel en zonder
-> extensie.
+Wil je daarna ook via SSH werken — en dat wil je, want daar gebeurt het meeste
+— dan heb je nog wel een sleutel nodig. Stuur een mail naar
+[compute@kdg.be](mailto:compute@kdg.be) of volg [stap 2](#2-draai-één-commando).
 
 ---
 
@@ -202,7 +170,7 @@ begin bij wat je nodig hebt.
 
 | | Waarvoor | Wat je nodig hebt |
 |---|---|---|
-| **[Jupyter-notebook via de portal](jupyter.md)** | Uitproberen en verkennen in je browser | Een browser en de tunnel uit stap 5 |
+| **[Jupyter-notebook via de portal](jupyter.md)** | Uitproberen en verkennen in je browser | Alleen een browser en de VPN |
 | **[Werken in je eigen editor](editor.md)** | Dagelijks werk, met je eigen extensies en sneltoetsen | VS Code, Cursor of PyCharm |
 | **[Python, pakketten en git](python.md)** | Een omgeving per project opzetten | De terminal |
 | **[Rekenwerk indienen met Slurm](slurm.md)** | Werk dat te zwaar is voor de loginnode | Begrip van een wachtrij |
@@ -255,7 +223,7 @@ en wat de server ermee deed.
 | `Could not resolve hostname kdg-compute` | Je hebt stap 2 niet gedraaid — gebruik het volledige adres |
 | De test in stap 7 faalt | Normaal als je een passphrase op je sleutel zette; test met `ssh kdg-compute` |
 | Je job blijft in `PD` staan in `squeue` | De cluster is bezet, of je vraagt meer dan er is. `sinfo` toont wat vrij is |
-| Portal onbereikbaar, tunnel staat open | FoxyProxy staat uit, of de naam wordt lokaal opgezocht (zie stap 5) |
+| Portal onbereikbaar | VPN staat niet aan. Het adres is `https://datalab.kdg.be:8080`, met de `https` en de poort erbij |
 
 Lukt het niet? Open een
 [issue](https://github.com/KdG-OCDI/hpc-public/issues) of stuur een mail naar

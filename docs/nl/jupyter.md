@@ -65,8 +65,8 @@ Sluit je sessie af via de portal, onder *My Interactive Sessions* → **Delete**
 Zolang de sessie draait, blijft die capaciteit voor jou gereserveerd en kan
 niemand anders die gebruiken.
 
-Vergeet daarna de tunnel niet te sluiten met `Ctrl+C`, en zet FoxyProxy weer
-uit.
+Sluit daarna gewoon je browsertabblad; er staat niets meer open dat je zelf
+moet opruimen.
 
 ---
 
