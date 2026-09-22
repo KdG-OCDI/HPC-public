@@ -51,7 +51,7 @@ Keep your `compose.yaml` in your project directory, like the rest of your
 project:
 
 ```bash
-cd /trinity/home/$USER/my-project
+cd /trinity/home/$USER/projects/my-project
 docker compose up -d
 docker compose ps
 docker compose logs -f mlflow

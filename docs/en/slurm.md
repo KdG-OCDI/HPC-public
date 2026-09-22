@@ -59,7 +59,7 @@ file `job.sh` in your project directory:
 #SBATCH --output=slurm-%j.out
 #SBATCH --error=slurm-%j.err
 
-cd /trinity/home/$USER/my-project
+cd /trinity/home/$USER/projects/my-project
 uv run python hello.py
 ```
 
@@ -131,7 +131,7 @@ directory is on shared storage, so every node already sees that file. You only
 have to have it read:
 
 ```bash
-cd /trinity/home/$USER/my-project
+cd /trinity/home/$USER/projects/my-project
 uv run --env-file .env python hello.py
 ```
 
@@ -251,7 +251,7 @@ with a `cd` into the project directory and runs through `uv run`, rather than
 just `python hello.py`:
 
 ```bash
-cd /trinity/home/$USER/my-project
+cd /trinity/home/$USER/projects/my-project
 uv run python hello.py
 ```
 

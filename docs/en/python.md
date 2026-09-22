@@ -29,7 +29,8 @@ source ~/.bashrc
 Setting up a project:
 
 ```bash
-cd /trinity/home/$USER
+mkdir -p /trinity/home/$USER/projects
+cd /trinity/home/$USER/projects
 mkdir my-project && cd my-project
 uv init
 uv add numpy pandas
@@ -42,7 +43,7 @@ uv add numpy pandas
 This is the step that makes the difference, and the one most easily skipped.
 
 In **VS Code or Cursor**: *File → Open Folder* →
-`/trinity/home/your_username/my-project`. The project directory itself, not
+`/trinity/home/your_username/projects/my-project`. The project directory itself, not
 your home.
 
 Then pick the environment `uv` created: `Ctrl+Shift+P` →
