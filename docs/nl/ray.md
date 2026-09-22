@@ -141,6 +141,86 @@ sneller, maar geconcentreerd op een paar machines.
 
 ---
 
+---
+
+## Een actor: iets dat blijft staan
+
+Een `@ray.remote`-functie begint elke keer opnieuw. Soms wil je dat niet — je
+wil iets één keer inladen en daarna hergebruiken. Dat is een **actor**: een
+object dat op een node blijft leven, met zijn eigen geheugen.
+
+```python
+@ray.remote(resources={"compute_node": 1})
+class Verzamelaar:
+    def __init__(self):
+        self.totaal = 0
+        self.machine = socket.gethostname()
+
+    def tel(self, getal):
+        self.totaal += getal
+        return self.totaal
+
+    def stand(self):
+        return self.machine, self.totaal
+
+teller = Verzamelaar.remote()
+for i in range(5):
+    teller.tel.remote(i)
+
+print(ray.get(teller.stand.remote()))
+```
+
+```
+('node004.cluster', 10)
+```
+
+Vijf aanroepen, en de optelling bleef bestaan tussen die aanroepen door — op
+één bepaalde machine. Let op het verschil met een functie: `Verzamelaar.remote()`
+maakt het object aan, en daarna roep je methodes aan met `.remote()`.
+
+Waar dit werkelijk voor dient is niet tellen maar **iets zwaars één keer
+klaarzetten**: een model in het geheugen laden, een databaseverbinding openen,
+een grote tabel inlezen. Honderd taken die elk hetzelfde model inladen kosten
+honderd keer die laadtijd; één actor laadt het één keer en beantwoordt honderd
+vragen.
+
+---
+
+## Pakketten meesturen
+
+Je taken draaien op machines waar jouw `uv`-omgeving niet geldt. Heeft je code
+een pakket nodig, dan geef je dat mee — Ray installeert het op de nodes waar de
+taak terechtkomt:
+
+```python
+@ray.remote(runtime_env={"pip": ["cowsay==6.1"]})
+def iets_met_cowsay():
+    import cowsay
+    return "gelukt"
+```
+
+Of in één keer voor alles wat je daarna start:
+
+```python
+ray.init("ray://login01:10001", runtime_env={"pip": ["pandas==2.2.3"]})
+```
+
+En bij een ingediende job:
+
+```bash
+ray job submit --address http://login01:8265 --working-dir . \
+  --runtime-env-json '{"pip": ["pandas==2.2.3"]}' -- python mijn_script.py
+```
+
+> De eerste taak met een nieuwe omgeving duurt langer, want dan wordt er
+> geïnstalleerd. Ray bewaart die omgeving daarna, dus alleen de eerste keer
+> betaal je. Zet er versies bij (`==2.2.3`): zonder versienummer krijg je op de
+> ene node iets anders dan op de andere zodra er een nieuwe uitgave verschijnt.
+
+Voor bestanden werkt het net zo: `--working-dir .` bij `ray job submit` stuurt
+je projectmap mee. Binnen deze cluster heb je dat meestal niet nodig, want
+`/trinity/home` staat op elke node — dat scheelt kopiëren.
+
 ## Het dashboard
 
 `http://login01:8265` toont wat er draait, per node en per taak. Je komt er via
@@ -163,6 +243,24 @@ Je code draait dan op de cluster zelf, met een job-id, logs die je later kan
 opvragen, en zonder dat jouw machine verbonden hoeft te blijven.
 
 ---
+
+---
+
+## Er is meer dan taken en actors
+
+Dit zijn de twee bouwstenen waar de rest op staat. Daarboven heeft Ray
+bibliotheken voor werk dat je anders zelf zou schrijven:
+
+| | Waarvoor |
+|---|---|
+| **[Ray Data](https://docs.ray.io/en/latest/data/data.html)** | grote datasets inlezen en bewerken, verdeeld over de nodes |
+| **[Ray Train](https://docs.ray.io/en/latest/train/train.html)** | een model trainen over meerdere GPU's, met PyTorch of TensorFlow |
+| **[Ray Tune](https://docs.ray.io/en/latest/tune/index.html)** | hyperparameters zoeken: honderden varianten tegelijk |
+| **[Ray Serve](https://docs.ray.io/en/latest/serve/index.html)** | een getraind model als API aanbieden |
+
+Ze gebruiken dezelfde cluster en dezelfde verbinding als hierboven. Ray Tune
+op zestien GPU's is waarschijnlijk het punt waarop deze cluster zich voor jou
+terugbetaalt — dat is werk dat op één machine dagen kost.
 
 ## Waarom Ray en niet Slurm
 

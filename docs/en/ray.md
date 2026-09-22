@@ -140,6 +140,85 @@ concentrated on a few machines.
 
 ---
 
+---
+
+## An actor: something that stays
+
+A `@ray.remote` function starts fresh every time. Sometimes that is not what
+you want — you want to load something once and reuse it. That is an **actor**:
+an object that stays alive on a node, with its own memory.
+
+```python
+@ray.remote(resources={"compute_node": 1})
+class Collector:
+    def __init__(self):
+        self.total = 0
+        self.machine = socket.gethostname()
+
+    def add(self, number):
+        self.total += number
+        return self.total
+
+    def state(self):
+        return self.machine, self.total
+
+counter = Collector.remote()
+for i in range(5):
+    counter.add.remote(i)
+
+print(ray.get(counter.state.remote()))
+```
+
+```
+('node004.cluster', 10)
+```
+
+Five calls, and the running total survived between them — on one particular
+machine. Note the difference from a function: `Collector.remote()` creates the
+object, and after that you call methods with `.remote()`.
+
+What this is really for is not counting but **setting something heavy up
+once**: loading a model into memory, opening a database connection, reading a
+large table. A hundred tasks that each load the same model pay that loading
+time a hundred times; one actor loads it once and answers a hundred questions.
+
+---
+
+## Sending packages along
+
+Your tasks run on machines where your `uv` environment does not apply. If your
+code needs a package, send it along — Ray installs it on the nodes where the
+task lands:
+
+```python
+@ray.remote(runtime_env={"pip": ["cowsay==6.1"]})
+def something_with_cowsay():
+    import cowsay
+    return "worked"
+```
+
+Or once, for everything you start afterwards:
+
+```python
+ray.init("ray://login01:10001", runtime_env={"pip": ["pandas==2.2.3"]})
+```
+
+And for a submitted job:
+
+```bash
+ray job submit --address http://login01:8265 --working-dir . \
+  --runtime-env-json '{"pip": ["pandas==2.2.3"]}' -- python my_script.py
+```
+
+> The first task with a new environment takes longer, because that is when the
+> installing happens. Ray keeps that environment afterwards, so you pay only
+> once. Pin versions (`==2.2.3`): without one, a new release can give you
+> something different on one node than on another.
+
+Files work the same way: `--working-dir .` sends your project directory along
+with `ray job submit`. Inside this cluster you rarely need it, because
+`/trinity/home` is on every node — which saves the copying.
+
 ## The dashboard
 
 `http://login01:8265` shows what is running, per node and per task. Reach it
@@ -163,6 +242,24 @@ Your code then runs on the cluster itself, with a job id, logs you can fetch
 later, and no need for your machine to stay connected.
 
 ---
+
+---
+
+## There is more than tasks and actors
+
+Those two are the building blocks everything else rests on. Above them, Ray has
+libraries for work you would otherwise write yourself:
+
+| | For |
+|---|---|
+| **[Ray Data](https://docs.ray.io/en/latest/data/data.html)** | reading and transforming large datasets, spread across the nodes |
+| **[Ray Train](https://docs.ray.io/en/latest/train/train.html)** | training a model across several GPUs, with PyTorch or TensorFlow |
+| **[Ray Tune](https://docs.ray.io/en/latest/tune/index.html)** | hyperparameter search: hundreds of variants at once |
+| **[Ray Serve](https://docs.ray.io/en/latest/serve/index.html)** | serving a trained model as an API |
+
+They use the same cluster and the same connection as above. Ray Tune on sixteen
+GPUs is probably the point where this cluster pays for itself — that is work
+which takes days on a single machine.
 
 ## Why Ray and not Slurm
 
