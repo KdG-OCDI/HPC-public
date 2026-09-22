@@ -115,22 +115,21 @@ jobscript — zie [omgevingsvariabelen](slurm.md#omgevingsvariabelen).
 
 ---
 
-## Op een compute node: Apptainer
+## Op een compute node: nog niet
 
 Heb je een container nodig bij het rekenwerk zelf, dan is Docker daar geen
-optie: er draait geen daemon op de nodes, en die zou ook als root draaien.
-**Apptainer** (vroeger Singularity) doet hetzelfde werk als jouw gebruiker, met
-jouw rechten en jouw home-map.
+optie: er draait geen daemon op de compute nodes, en die zou ook als root
+draaien. Het gebruikelijke antwoord op een cluster is **Apptainer** (vroeger
+Singularity) of **Podman** — die draaien als jouw gebruiker, met jouw rechten.
 
-Een bestaand Docker-image omzetten en gebruiken:
+**Op deze cluster staat geen van beide klaar.** Alleen `node008` heeft Podman.
+Heb je containers nodig in een job, stuur dan een mail naar
+[compute@kdg.be](mailto:compute@kdg.be) met wat je wil draaien — dat helpt
+bepalen welke van de twee het wordt.
 
-```bash
-apptainer build mijn-image.sif docker://python:3.12
-apptainer exec --nv mijn-image.sif python mijn_script.py
-```
-
-`--nv` geeft de container toegang tot de GPU's van de node. Zo'n `.sif` is één
-bestand in je projectmap, dus elke node ziet het meteen.
+Ondertussen: voor Python-werk heb je meestal geen container nodig. Een
+omgeving met [uv](python.md) staat op gedeelde opslag en is daardoor op elke
+node hetzelfde — dat is precies wat een container je hier zou opleveren.
 
 ---
 
