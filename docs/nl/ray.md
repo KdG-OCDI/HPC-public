@@ -60,6 +60,38 @@ loginnode.
 
 ---
 
+### Vanaf je eigen laptop
+
+Het kan ook zonder Remote-SSH, rechtstreeks vanuit een notebook of script op je
+eigen machine. Je hebt dan twee dingen nodig: de **VPN** aan, en een **tunnel**
+naar de cluster, want poort 10001 is van buitenaf niet bereikbaar.
+
+Laat dit venster openstaan zolang je werkt:
+
+```bash
+ssh -L 10001:localhost:10001 -L 8265:localhost:8265 kdg-compute
+```
+
+In je code gebruik je dan `localhost` in plaats van `login01`, en je stuurt je
+projectmap mee — die staat immers op je laptop en niet op de cluster:
+
+```python
+ray.init("ray://localhost:10001", runtime_env={"working_dir": "."})
+```
+
+Zonder `working_dir` vindt je taak je eigen modules niet: de code die je
+schrijft draait op een compute node, niet bij jou. Ray pakt die map in, stuurt
+hem mee en pakt hem daar weer uit.
+
+> Houd die map klein. Ray weigert een `working_dir` boven 100 MB, en je stuurt
+> hem over de VPN. Datasets horen daar niet in — zet die op `/trinity/home` of
+> in MinIO, en laat je taken ze daar lezen. `.gitignore` wordt gerespecteerd,
+> dus een `.venv` gaat niet mee.
+
+Ook hier geldt de versie-eis: `ray==2.55.1`, ook op Windows.
+
+---
+
 ## Hallo Ray
 
 Maak `hallo_ray.py` in je projectmap, of plak dit in een notebookcel:

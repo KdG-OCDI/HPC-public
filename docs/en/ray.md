@@ -59,6 +59,38 @@ compute node while your VS Code terminal is on the login node.
 
 ---
 
+### From your own laptop
+
+This also works without Remote-SSH, straight from a notebook or script on your
+own machine. You need two things: the **VPN** on, and a **tunnel** to the
+cluster, because port 10001 is not reachable from outside.
+
+Leave this window open while you work:
+
+```bash
+ssh -L 10001:localhost:10001 -L 8265:localhost:8265 kdg-compute
+```
+
+In your code you then use `localhost` instead of `login01`, and you send your
+project directory along — it is on your laptop, after all, not on the cluster:
+
+```python
+ray.init("ray://localhost:10001", runtime_env={"working_dir": "."})
+```
+
+Without `working_dir` your task cannot find your own modules: the code you
+write runs on a compute node, not with you. Ray packs that directory up, sends
+it along and unpacks it there.
+
+> Keep that directory small. Ray refuses a `working_dir` over 100 MB, and you
+> are sending it over the VPN. Datasets do not belong in it — put those on
+> `/trinity/home` or in MinIO and let your tasks read them there. `.gitignore`
+> is respected, so a `.venv` does not travel.
+
+The version requirement holds here too: `ray==2.55.1`, on Windows as well.
+
+---
+
 ## Hello Ray
 
 Create `hello_ray.py` in your project directory, or paste this into a notebook
