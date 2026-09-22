@@ -121,9 +121,11 @@ Three things that usually clear it up:
 - **The name in the middle is resolved on the cluster**, not with you. That is
   why you can write `node002` there even though your laptop has never heard of
   that machine — login01 covers the rest of the distance.
-- You will often see `localhost` in the middle. That works (from login01,
-  `localhost` is login01), but writing `login01` reads more clearly: it says
-  where you end up.
+- You will often see `localhost` in the middle. That always works — from
+  login01, `localhost` is login01 — and writing `login01` reads more clearly,
+  because it says where you end up. With one exception: a service listening on
+  the machine itself only, such as the Ray Client, is reachable through
+  `localhost` and nothing else. When in doubt, use `localhost`.
 
 | Command | What you get |
 |---|---|

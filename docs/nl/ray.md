@@ -59,24 +59,24 @@ dezelfde versies zonder het te moeten weten.
 
 ## Verbinden
 
-Eén regel, en die werkt overal hetzelfde:
+Welk adres je gebruikt hangt af van waar je code draait. Drie gevallen, en dat
+zijn ze alle drie:
 
-```python
-import ray
-ray.init("ray://login01:10001")
-```
+| Waar jouw code draait | Wat je schrijft |
+|---|---|
+| Op de loginnode — VS Code-terminal, script, notebook in VS Code | `ray.init("ray://localhost:10001")` |
+| Op een compute node — een notebook uit de [portal](jupyter.md) | `ray.init("login01:6379")` |
+| Op je eigen laptop, met een tunnel (zie hieronder) | `ray.init("ray://localhost:10001", runtime_env={"working_dir": "."})` |
 
-Zowel vanuit een notebook in [VS Code](editor.md) als vanuit een
-[notebook in de portal](jupyter.md), en ook vanuit een gewoon script. Je hoeft
-niet te weten op welke machine je zelf zit — en dat is maar goed ook, want een
-notebook uit de portal draait op een compute node en je VS Code-terminal op de
-loginnode.
+**Waarom niet overal hetzelfde?** De Ray Client, poort 10001, luistert alleen
+op de loginnode zelf — vanaf een compute node kan je er niet bij. Draai je
+daar, dan sluit je rechtstreeks aan op de cluster via poort 6379, en dat is
+zelfs iets sneller: je code wordt dan deel van de cluster in plaats van een
+gast die alles over een verbinding stuurt.
 
-> Je komt in voorbeelden op het internet vaak `ray.init(address="auto")` tegen.
-> Dat werkt hier niet: dat zoekt een Ray-sessie op de machine waar je zelf
-> zit. Gebruik het adres hierboven.
-
----
+> `ray.init(address="auto")` kom je vaak tegen in voorbeelden op het internet.
+> Dat werkt hier niet: het zoekt een Ray-sessie op jouw eigen machine, in een
+> map waar deze cluster de zijne niet bewaart. Gebruik een adres uit de tabel.
 
 ### Vanaf je eigen laptop
 
@@ -88,11 +88,12 @@ regel leest staat bij [containers](containers.md#zonder-vs-code-een-tunnel-met-s
 Laat dit venster openstaan zolang je werkt:
 
 ```bash
-ssh -L 10001:login01:10001 -L 8265:login01:8265 kdg-compute
+ssh -L 10001:localhost:10001 -L 8265:localhost:8265 kdg-compute
 ```
 
-In je code gebruik je dan `localhost` in plaats van `login01`, en je stuurt je
-projectmap mee — die staat immers op je laptop en niet op de cluster:
+Merk op dat er in het midden `localhost` staat: de Ray Client luistert alleen
+op de loginnode zelf, dus je stuurt door naar haar eigen loopback. In je code
+stuur je daarnaast je projectmap mee — die staat immers op je laptop en niet op de cluster:
 
 ```python
 ray.init("ray://localhost:10001", runtime_env={"working_dir": "."})
@@ -121,7 +122,7 @@ import socket
 import time
 from collections import Counter
 
-ray.init("ray://login01:10001")
+ray.init("ray://localhost:10001")
 
 print(ray.cluster_resources())      # wat ziet Ray?
 
@@ -251,7 +252,7 @@ def iets_met_cowsay():
 Of in één keer voor alles wat je daarna start:
 
 ```python
-ray.init("ray://login01:10001", runtime_env={"pip": ["pandas==2.2.3"]})
+ray.init("ray://localhost:10001", runtime_env={"pip": ["pandas==2.2.3"]})
 ```
 
 En bij een ingediende job:
