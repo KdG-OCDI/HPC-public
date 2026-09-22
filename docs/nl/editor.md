@@ -38,7 +38,7 @@ en werk in te dienen, niet om te rekenen. Zie [Slurm](slurm.md).
 
 **Je kan hier ook notebooks draaien.** Open een `.ipynb` in VS Code en kies je
 [uv-omgeving](python.md) als kernel. Je werkt dan in een notebook zonder dat je
-de portal en de tunnel uit stap 5 nodig hebt.
+de portal nodig hebt.
 
 Let wel op waar zo'n notebook draait: op de loginnode, net als je terminal.
 Prima dus om iets uit te proberen of een grafiek te maken, maar zodra een cel

@@ -39,7 +39,7 @@ submit work, not to compute. See [Slurm](slurm.md).
 
 **You can run notebooks here too.** Open a `.ipynb` in VS Code and pick your
 [uv environment](python.md) as the kernel. You then work in a notebook without
-needing the portal and the tunnel from step 5.
+needing the portal.
 
 Do mind where such a notebook runs: on the login node, like your terminal. Fine
 for trying something out or drawing a chart, but as soon as a cell computes for

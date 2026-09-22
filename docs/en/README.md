@@ -126,69 +126,39 @@ ssh kdg-compute passwd
 
 ---
 
-## 5. Reaching the web portal
+## 5. The web portal
 
-Only needed if you want to use the portal, for instance for a
-[Jupyter notebook in your browser](jupyter.md). If you would rather work in
-your own editor, you can skip this chapter.
+Only needed if you want to use the portal, for instance for a [Jupyter notebook
+in your browser](jupyter.md). If you prefer your own editor, you can skip this
+chapter.
 
-The portal runs on an address that only exists inside the cluster network. Your
-browser cannot resolve that name, not even on the VPN. So you send your browser
-traffic through a tunnel that resolves the name on the cluster side.
+Turn the VPN on (or use the KdG network) and go to:
 
-### Step 1 — open the tunnel
+**[https://datalab.kdg.be:8080](https://datalab.kdg.be:8080)**
 
-```bash
-ssh -N -D 9090 kdg-compute
-```
+Click **Azure SSO Login** and sign in with your school account. Nothing else:
+no tunnel, no browser extension.
 
-This command blocks and prints nothing. That is expected: leave the window open
-while you use the portal. Any port number above 1024 works instead of 9090.
+![Sign-in page](../../images/login_page.png)
 
-### Step 2 — send your browser through the tunnel
+> **Your browser will warn about the certificate.** Click *Advanced* and
+> continue anyway. The server's certificate is still issued for an older name;
+> a new one has been requested. Your connection is encrypted either way — your
+> browser simply cannot confirm who is on the other end, and inside the KdG
+> network that is an acceptable risk.
 
-Use [FoxyProxy](https://addons.mozilla.org/firefox/addon/foxyproxy-standard/),
-available for Firefox, Chrome and Edge. You can also do this in your operating
-system's settings, but then **all** your internet traffic goes through the
-cluster, including ordinary browsing. FoxyProxy lets you limit it to the
-cluster address.
+You are in. What you can do there is described in [A Jupyter notebook through
+the portal](jupyter.md).
 
-Create a proxy of type **SOCKS5**, host `localhost`, port `9090`:
+### Your first time
 
-![FoxyProxy settings](../../images/foxyproxy.png)
+If you do not have a cluster account yet, the portal creates one for you on
+your first sign-in, based on your school account. So you need no account name
+and no password to get in.
 
-Then add a rule of type *wildcard* with this pattern, and select
-**Proxy by Patterns**:
-
-```
-://controller1.cluster:*
-```
-
-![FoxyProxy patterns](../../images/foxyproxy_patterns.png)
-
-> **Important with SOCKS5:** the name `controller1.cluster` has to be resolved
-> on the cluster side, not on your laptop. In Firefox that is the
-> *Proxy DNS when using SOCKS v5* checkbox; FoxyProxy sets it correctly by
-> itself. Doing this through your system settings often fails for exactly this
-> reason.
-
-### Step 3 — open the portal
-
-Go to [https://controller1.cluster:8080](https://controller1.cluster:8080) and
-click **Azure SSO Login** to sign in with your school account.
-
-![Login page](../../images/login_page.png)
-
-You are in. What you can do there is described in
-[A Jupyter notebook through the portal](jupyter.md).
-
-### When you are done
-
-Close the tunnel with `Ctrl+C` and switch FoxyProxy off again.
-
-> This whole chapter goes away once the portal gets an address that works over
-> the VPN. You will simply type an address in your browser, with no tunnel and
-> no extension.
+If you also want to work over SSH afterwards — and you will, since that is
+where most of it happens — you still need a key. Mail
+[compute@kdg.be](mailto:compute@kdg.be) or follow [step 2](#2-run-one-command).
 
 ---
 
@@ -199,7 +169,7 @@ with whatever you need.
 
 | | For | What you need |
 |---|---|---|
-| **[Jupyter notebook through the portal](jupyter.md)** | Trying things out and exploring, in your browser | A browser and the tunnel from step 5 |
+| **[Jupyter notebook through the portal](jupyter.md)** | Trying things out and exploring, in your browser | Just a browser and the VPN |
 | **[Working in your own editor](editor.md)** | Daily work, with your own extensions and shortcuts | VS Code, Cursor or PyCharm |
 | **[Python, packages and git](python.md)** | Setting up a per-project environment | The terminal |
 | **[Submitting work with Slurm](slurm.md)** | Work too heavy for the login node | Understanding of a queue |
@@ -251,7 +221,7 @@ server did with it.
 | `Could not resolve hostname kdg-compute` | You have not run step 2 — use the full address |
 | The test in step 7 fails | Normal if you set a passphrase on your key; test with `ssh kdg-compute` |
 | Your job sits at `PD` in `squeue` | The cluster is busy, or you asked for more than exists. `sinfo` shows what is free |
-| Portal unreachable while the tunnel is open | FoxyProxy is off, or the name is being resolved locally (see step 5) |
+| Portal unreachable | The VPN is off. The address is `https://datalab.kdg.be:8080`, with the `https` and the port |
 
 Still stuck? Open an
 [issue](https://github.com/KdG-OCDI/hpc-public/issues) or mail

@@ -64,7 +64,7 @@ End your session in the portal, under *My Interactive Sessions* → **Delete**.
 While the session runs, that capacity stays reserved for you and nobody else
 can use it.
 
-Then close the tunnel with `Ctrl+C` and switch FoxyProxy off again.
+Then simply close your browser tab; nothing else is left open.
 
 ---
 
