@@ -206,7 +206,7 @@ begin bij wat je nodig hebt.
 | **[Werken in je eigen editor](editor.md)** | Dagelijks werk, met je eigen extensies en sneltoetsen | VS Code, Cursor of PyCharm |
 | **[Python, pakketten en git](python.md)** | Een omgeving per project opzetten | De terminal |
 | **[Rekenwerk indienen met Slurm](slurm.md)** | Werk dat te zwaar is voor de loginnode | Begrip van een wachtrij |
-| **[Verdeeld rekenen met Ray](ray.md)** | Werk over meerdere machines tegelijk | Een project met `ray==2.55.1` |
+| **[Verdeeld rekenen met Ray](ray.md)** | Werk over meerdere machines tegelijk | Een project met `ray[client]==2.55.1` |
 | **[Diensten draaien in containers](containers.md)** | MLflow, Postgres, MinIO, LakeFS — naast je rekenwerk | Docker op de loginnode |
 
 Weet je niet waar te beginnen: [je eigen editor](editor.md) is wat de meeste

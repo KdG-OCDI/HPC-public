@@ -32,10 +32,28 @@ verbinding. Daarom zet je hem vast in je project:
 
 ```bash
 cd /trinity/home/$USER/projects/mijn-project
-uv add "ray==2.55.1"
+uv add "ray[client]==2.55.1"
 ```
 
-Zo staat het in je `pyproject.toml` en hoeft niemand het te onthouden.
+Let op die **`[client]`**. Zonder die toevoeging krijg je de minimale Ray, en
+struikel je pas bij het verbinden over:
+
+```
+ValueError: Ray Client requires pip package `ray[client]`.
+```
+
+Werk je in een notebook, dan heb je er nog twee nodig:
+
+```bash
+uv add ipykernel ipywidgets
+```
+
+`ipykernel` maakt van je omgeving een kernel die VS Code kan kiezen;
+`ipywidgets` is wat Ray gebruikt om de voortgang van je taken te tonen. Vraagt
+iets toch nog om `pip`, dan is `uv add pip` genoeg.
+
+Alles staat daarna in je `pyproject.toml`, dus wie je project kloont krijgt
+dezelfde versies zonder het te moeten weten.
 
 ---
 
@@ -89,7 +107,7 @@ hem mee en pakt hem daar weer uit.
 > in MinIO, en laat je taken ze daar lezen. `.gitignore` wordt gerespecteerd,
 > dus een `.venv` gaat niet mee.
 
-Ook hier geldt de versie-eis: `ray==2.55.1`, ook op Windows.
+Ook hier geldt de versie-eis: `ray[client]==2.55.1`, ook op Windows.
 
 ---
 
@@ -282,12 +300,20 @@ opvragen, en zonder dat jouw machine verbonden hoeft te blijven.
 Dit zijn de twee bouwstenen waar de rest op staat. Daarboven heeft Ray
 bibliotheken voor werk dat je anders zelf zou schrijven:
 
-| | Waarvoor |
-|---|---|
-| **[Ray Data](https://docs.ray.io/en/latest/data/data.html)** | grote datasets inlezen en bewerken, verdeeld over de nodes |
-| **[Ray Train](https://docs.ray.io/en/latest/train/train.html)** | een model trainen over meerdere GPU's, met PyTorch of TensorFlow |
-| **[Ray Tune](https://docs.ray.io/en/latest/tune/index.html)** | hyperparameters zoeken: honderden varianten tegelijk |
-| **[Ray Serve](https://docs.ray.io/en/latest/serve/index.html)** | een getraind model als API aanbieden |
+| | Waarvoor | Erbij installeren |
+|---|---|---|
+| **[Ray Data](https://docs.ray.io/en/latest/data/data.html)** | grote datasets inlezen en bewerken, verdeeld over de nodes | `ray[data]` |
+| **[Ray Train](https://docs.ray.io/en/latest/train/train.html)** | een model trainen over meerdere GPU's, met PyTorch of TensorFlow | `ray[train]` |
+| **[Ray Tune](https://docs.ray.io/en/latest/tune/index.html)** | hyperparameters zoeken: honderden varianten tegelijk | `ray[tune]` |
+| **[Ray Serve](https://docs.ray.io/en/latest/serve/index.html)** | een getraind model als API aanbieden | `ray[serve]` |
+
+Elk daarvan is een aparte optie bij het installeren; `ray[client]` alleen geeft
+je taken en actors, meer niet. Combineren kan in één keer, en de versie moet
+overal dezelfde blijven:
+
+```bash
+uv add "ray[client,data,train]==2.55.1"
+```
 
 Ze gebruiken dezelfde cluster en dezelfde verbinding als hierboven. Ray Tune
 op zestien GPU's is waarschijnlijk het punt waarop deze cluster zich voor jou
