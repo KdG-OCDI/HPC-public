@@ -126,9 +126,32 @@ to find than one that always fails.
 
 So state in your script what you need, instead of trusting that it comes along.
 
-**A `.env` in your project.** It does not need to go anywhere: your project
-directory is on shared storage, so every node already sees that file. You only
-have to have it read:
+### Only what is exported travels
+
+This is the first thing people trip over, and it has nothing to do with Slurm:
+
+```bash
+TEST=Koekoek                 # only in this shell
+export REAL=Koekoek          # in the environment
+
+srun --partition=defq --time=00:05:00 --pty bash
+echo $TEST                   # empty
+echo $REAL                   # Koekoek
+```
+
+Without `export`, a variable exists only in your own shell and no child process
+sees it — not even `bash -c 'echo $TEST'` on your own machine. There is simply
+nothing to pass along.
+
+> Options go before the command: `srun --export=ALL … --pty bash`, not
+> `srun … --pty bash --export=ALL`. In the second case `bash` gets the flag and
+> complains about it.
+
+### A `.env` in your project
+
+If your settings live in a `.env` — keys, addresses, paths — it does not need
+to go anywhere: your project directory is on shared storage, so every node
+already sees that file. You only have to have it read:
 
 ```bash
 cd /trinity/home/$USER/projects/my-project
@@ -137,18 +160,45 @@ uv run --env-file .env python hello.py
 
 Or load it in your code with `python-dotenv`, if you use that already.
 
-**One variable for this one job.** Put it in the script, above your command:
+### One variable for this one job
+
+If something belongs to this job rather than in your `.env` — a random seed, a
+model name, an output directory — put it in the script itself:
 
 ```bash
 export SEED=42
 uv run python hello.py
 ```
 
-Or pass it at submission:
+Or pass it at submission, without touching your script:
 
 ```bash
 sbatch --export=ALL,SEED=42 job.sh
 ```
+
+### Both in one job script
+
+In practice you use them together: the `.env` file for what always applies, an
+`export` for what belongs to this job.
+
+```bash
+#!/bin/bash
+#SBATCH --job-name=hello-hpc
+#SBATCH --partition=defq
+#SBATCH --cpus-per-task=4
+#SBATCH --time=00:05:00
+#SBATCH --output=slurm-%j.out
+#SBATCH --error=slurm-%j.err
+
+cd /trinity/home/$USER/projects/my-project
+
+export SEED=42                       # for this job only
+uv run --env-file .env python hello.py
+```
+
+Your job now depends on two things that are both visible: a file in your
+project directory and a line in your script. It no longer depends on the
+terminal you typed `sbatch` in — which is the point.
 
 **What does not come along:** anything your `.bashrc` only does for interactive
 shells. A job does not run an interactive shell, so none of that happens.

@@ -127,9 +127,33 @@ lastiger te vinden dan een die altijd faalt.
 Zet daarom in je script wat je nodig hebt, in plaats van erop te vertrouwen dat
 het meekomt.
 
-**Een `.env` in je project.** Die hoeft nergens heen: je projectmap staat op
-gedeelde opslag, dus elke node ziet dat bestand al. Je moet hem alleen laten
-inlezen:
+### Alleen wat geëxporteerd is, komt mee
+
+Dit is het eerste waar mensen op stuklopen, en het heeft niets met Slurm te
+maken:
+
+```bash
+TEST=Koekoek                 # alleen in deze shell
+export ECHT=Koekoek          # in de omgeving
+
+srun --partition=defq --time=00:05:00 --pty bash
+echo $TEST                   # leeg
+echo $ECHT                   # Koekoek
+```
+
+Zonder `export` bestaat een variabele alleen in jouw shell en ziet geen enkel
+kindproces hem — ook `bash -c 'echo $TEST'` op je eigen machine niet. Er valt
+dan gewoon niets door te geven.
+
+> Opties horen vóór het commando: `srun --export=ALL … --pty bash`, niet
+> `srun … --pty bash --export=ALL`. In dat tweede geval krijgt `bash` die vlag
+> en klaagt hij erover.
+
+### Een `.env` in je project
+
+Staan je instellingen in een `.env` — sleutels, adressen, paden — dan hoeft die
+nergens heen: je projectmap staat op gedeelde opslag, dus elke node ziet dat
+bestand al. Je moet hem alleen laten inlezen:
 
 ```bash
 cd /trinity/home/$USER/projects/mijn-project
@@ -138,19 +162,45 @@ uv run --env-file .env python hello.py
 
 Of laad hem in je code met `python-dotenv`, als je dat al gebruikt.
 
-**Eén variabele voor deze ene job.** Zet hem gewoon in het script, boven je
-commando:
+### Eén variabele voor deze ene job
+
+Hoort iets bij deze ene job en niet in je `.env` — een random seed, een
+modelnaam, een uitvoermap — zet het dan in het script zelf:
 
 ```bash
 export SEED=42
 uv run python hello.py
 ```
 
-Of geef hem mee bij het indienen:
+Of geef het mee bij het indienen, zonder je script aan te passen:
 
 ```bash
 sbatch --export=ALL,SEED=42 job.sh
 ```
+
+### Allebei in één jobscript
+
+In de praktijk gebruik je ze samen: het `.env`-bestand voor wat altijd geldt,
+een `export` voor wat bij deze job hoort.
+
+```bash
+#!/bin/bash
+#SBATCH --job-name=hallo-hpc
+#SBATCH --partition=defq
+#SBATCH --cpus-per-task=4
+#SBATCH --time=00:05:00
+#SBATCH --output=slurm-%j.out
+#SBATCH --error=slurm-%j.err
+
+cd /trinity/home/$USER/projects/mijn-project
+
+export SEED=42                       # alleen voor deze job
+uv run --env-file .env python hello.py
+```
+
+Zo hangt je job aan twee dingen die allebei zichtbaar zijn: een bestand in je
+projectmap en een regel in je script. Aan de terminal waaruit je `sbatch` tikte
+hangt hij niet meer — en dat is precies de bedoeling.
 
 **Wat níét meekomt:** alles wat je `.bashrc` alleen voor interactieve shells
 doet. Een job draait geen interactieve shell, dus wat daar staat gebeurt niet.
