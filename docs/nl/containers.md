@@ -119,9 +119,12 @@ Drie dingen die het meestal ophelderen:
 - **De naam in het midden wordt op de cluster opgezocht**, niet bij jou.
   Daarom kan je daar `node002` schrijven terwijl je laptop die machine niet
   eens kent — login01 legt de rest van de weg af.
-- Je ziet vaak `localhost` in het midden staan. Dat werkt (vanaf login01 is
-  `localhost` gewoon login01), maar `login01` schrijven leest duidelijker:
-  dan staat er letterlijk waar je uitkomt.
+- Je ziet vaak `localhost` in het midden staan. Dat werkt altijd — vanaf
+  login01 is `localhost` gewoon login01 — en `login01` schrijven leest
+  duidelijker, want dan staat er letterlijk waar je uitkomt. Met één
+  uitzondering: een dienst die alleen op de machine zelf luistert, zoals de
+  Ray Client, bereik je uitsluitend via `localhost`. Twijfel je, neem dan
+  `localhost`.
 
 | Commando | Wat je krijgt |
 |---|---|

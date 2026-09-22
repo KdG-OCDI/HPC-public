@@ -59,23 +59,25 @@ the same versions without having to know about them.
 
 ## Connecting
 
-One line, the same everywhere:
+Which address you use depends on where your code runs. Three cases, and that is
+all of them:
 
-```python
-import ray
-ray.init("ray://login01:10001")
-```
+| Where your code runs | What you write |
+|---|---|
+| On the login node — VS Code terminal, script, notebook in VS Code | `ray.init("ray://localhost:10001")` |
+| On a compute node — a notebook from the [portal](jupyter.md) | `ray.init("login01:6379")` |
+| On your own laptop, with a tunnel (see below) | `ray.init("ray://localhost:10001", runtime_env={"working_dir": "."})` |
 
-From a notebook in [VS Code](editor.md), from a [notebook in the
-portal](jupyter.md), and from an ordinary script. You do not need to know which
-machine you are on — which is just as well, because a portal notebook runs on a
-compute node while your VS Code terminal is on the login node.
+**Why not the same everywhere?** The Ray Client, port 10001, listens on the
+login node only — from a compute node you cannot reach it. Running there, you
+attach to the cluster directly over port 6379, which is in fact slightly
+faster: your code becomes part of the cluster instead of a guest sending
+everything down a connection.
 
-> Examples on the internet often use `ray.init(address="auto")`. That does not
-> work here: it looks for a Ray session on the machine you are on. Use the
-> address above.
-
----
+> `ray.init(address="auto")` turns up in examples all over the internet. It
+> does not work here: it looks for a Ray session on your own machine, in a
+> directory where this cluster does not keep one. Use an address from the
+> table.
 
 ### From your own laptop
 
@@ -87,11 +89,11 @@ line is explained under [containers](containers.md#without-vs-code-a-tunnel-with
 Leave this window open while you work:
 
 ```bash
-ssh -L 10001:login01:10001 -L 8265:login01:8265 kdg-compute
+ssh -L 10001:localhost:10001 -L 8265:localhost:8265 kdg-compute
 ```
 
-In your code you then use `localhost` instead of `login01`, and you send your
-project directory along — it is on your laptop, after all, not on the cluster:
+Note the `localhost` in the middle: the Ray Client listens on the login node
+itself, so you forward to its own loopback. In your code you also send your project directory along — it is on your laptop, after all, not on the cluster:
 
 ```python
 ray.init("ray://localhost:10001", runtime_env={"working_dir": "."})
@@ -121,7 +123,7 @@ import socket
 import time
 from collections import Counter
 
-ray.init("ray://login01:10001")
+ray.init("ray://localhost:10001")
 
 print(ray.cluster_resources())      # what does Ray see?
 
@@ -249,7 +251,7 @@ def something_with_cowsay():
 Or once, for everything you start afterwards:
 
 ```python
-ray.init("ray://login01:10001", runtime_env={"pip": ["pandas==2.2.3"]})
+ray.init("ray://localhost:10001", runtime_env={"pip": ["pandas==2.2.3"]})
 ```
 
 And for a submitted job:
