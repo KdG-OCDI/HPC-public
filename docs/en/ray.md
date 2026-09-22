@@ -63,12 +63,13 @@ compute node while your VS Code terminal is on the login node.
 
 This also works without Remote-SSH, straight from a notebook or script on your
 own machine. You need two things: the **VPN** on, and a **tunnel** to the
-cluster, because port 10001 is not reachable from outside.
+cluster, because port 10001 is not reachable from outside. How to read such a
+line is explained under [containers](containers.md#without-vs-code-a-tunnel-with-ssh).
 
 Leave this window open while you work:
 
 ```bash
-ssh -L 10001:localhost:10001 -L 8265:localhost:8265 kdg-compute
+ssh -L 10001:login01:10001 -L 8265:login01:8265 kdg-compute
 ```
 
 In your code you then use `localhost` instead of `login01`, and you send your

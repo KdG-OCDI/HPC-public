@@ -97,6 +97,50 @@ Typical addresses, once the port is forwarded:
 > `node002:8888` instead of just the port number. VS Code then forwards to that
 > node, by way of the login node.
 
+### Without VS Code: a tunnel with ssh
+
+If you do not work in VS Code, one command does the same. Leave that window
+open while you use the service:
+
+```bash
+ssh -L 5000:login01:5000 kdg-compute
+```
+
+The shape of `-L` is:
+
+```
+ssh -L <port on your machine>:<host as seen from the cluster>:<port there> kdg-compute
+        └─ you choose this one        └─ looked up on the other side
+```
+
+Three things that usually clear it up:
+
+- **Only the first number is yours to choose.** It is the port on your own
+  machine; in your browser or your code you always use `localhost:<that
+  number>`.
+- **The name in the middle is resolved on the cluster**, not with you. That is
+  why you can write `node002` there even though your laptop has never heard of
+  that machine — login01 covers the rest of the distance.
+- You will often see `localhost` in the middle. That works (from login01,
+  `localhost` is login01), but writing `login01` reads more clearly: it says
+  where you end up.
+
+| Command | What you get |
+|---|---|
+| `-L 5000:login01:5000` | `localhost:5000` here is MLflow on the login node |
+| `-L 15000:login01:5000` | the same, on port 15000 — useful when your 5000 is taken |
+| `-L 8888:node002:8888` | `localhost:8888` here is port 8888 on **node002** |
+
+That last one is the interesting one: it reaches a server you started yourself
+in a job on a compute node, a vLLM server for instance.
+
+Several ports at once works too, by repeating `-L`:
+
+```bash
+ssh -L 5000:login01:5000 -L 9001:login01:9001 -L 8265:login01:8265 kdg-compute
+```
+
+
 ---
 
 ## Reaching them from a job
