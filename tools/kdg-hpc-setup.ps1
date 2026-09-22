@@ -29,6 +29,19 @@ $ErrorActionPreference = 'Stop'
 $ProgressPreference = 'SilentlyContinue'
 $script:Step = 0
 
+# Windows PowerShell 5.1 maakt van elke regel die een extern commando naar
+# stderr schrijft een FOUT zodra $ErrorActionPreference op Stop staat -- ook
+# als het commando gewoon slaagt. `ssh -V` schrijft zijn versie naar stderr,
+# dus daar liep het meteen op vast. PowerShell 7 doet dat niet, vandaar dat
+# het bij de ene wel werkt en bij de andere niet.
+function Invoke-Native {
+    param([Parameter(Mandatory)][scriptblock]$Command)
+    $prev = $ErrorActionPreference
+    $ErrorActionPreference = "Continue"
+    try { & $Command 2>&1 | ForEach-Object { "$_" } }
+    finally { $ErrorActionPreference = $prev }
+}
+
 function Write-Step  { $script:Step++; Write-Host ""; Write-Host "[$script:Step] $args" -ForegroundColor Cyan }
 function Write-Ok    { Write-Host "    OK  $args" -ForegroundColor Green }
 function Write-Info  { Write-Host "    ..  $args" -ForegroundColor DarkGray }
@@ -53,7 +66,7 @@ Of via Windows Instellingen > Systeem > Optionele onderdelen > Onderdeel toevoeg
 "@
     }
 }
-Write-Ok ((ssh -V 2>&1) -join ' ')
+Write-Ok ((Invoke-Native { ssh -V }) -join " ")
 
 # ------------------------------------------------------------- 2. Username
 Write-Step "Accountnaam"
@@ -95,7 +108,7 @@ if (Test-Path $KeyPath) {
 
 # Rechten op de prive-sleutel dichttimmeren; OpenSSH weigert een te ruim leesbare sleutel.
 $sid = ([Security.Principal.WindowsIdentity]::GetCurrent()).User.Value
-icacls $KeyPath /inheritance:r /grant:r "*${sid}:(R,W)" 2>&1 | Out-Null
+Invoke-Native { icacls $KeyPath /inheritance:r /grant:r "*${sid}:(R,W)" } | Out-Null
 Write-Ok "Bestandsrechten op de prive-sleutel gecorrigeerd"
 
 $pub = (Get-Content -Raw "$KeyPath.pub").Trim()
@@ -111,9 +124,11 @@ Write-Host ""
 
 $remote = "umask 077; mkdir -p ~/.ssh; touch ~/.ssh/authorized_keys; chmod 700 ~/.ssh; chmod 600 ~/.ssh/authorized_keys; grep -qxF '$pub' ~/.ssh/authorized_keys || echo '$pub' >> ~/.ssh/authorized_keys; echo SLEUTEL_GEPLAATST"
 
-$out = ssh -n -o PreferredAuthentications=password,keyboard-interactive `
-           -o PubkeyAuthentication=no `
-           "$User@$ClusterHost" $remote 2>&1
+$out = Invoke-Native {
+    ssh -n -o PreferredAuthentications=password,keyboard-interactive `
+        -o PubkeyAuthentication=no `
+        "$User@$ClusterHost" $remote
+}
 # Let op: $out is een array regels, en -match/-notmatch filtert een array in
 # plaats van een ja/nee te geven. Bij een mislukte eerste wachtwoordpoging
 # blijven er regels over die de melding niet bevatten, en dan zou een niet-lege
@@ -162,7 +177,7 @@ Write-Ok "Host '$Alias' toegevoegd aan $cfgPath"
 
 # -------------------------------------------------------------- 7. Verifieren
 Write-Step "Wachtwoordloos inloggen testen"
-$test = ssh -n -o BatchMode=yes -o ConnectTimeout=15 $Alias "echo LOGIN_OK; hostname" 2>&1
+$test = Invoke-Native { ssh -n -o BatchMode=yes -o ConnectTimeout=15 $Alias "echo LOGIN_OK; hostname" }
 $testText = ($test | Out-String)
 if ($testText -match 'LOGIN_OK') {
     Write-Ok "Verbinding werkt zonder wachtwoord"
