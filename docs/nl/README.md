@@ -13,8 +13,8 @@ begrijpt de rest van deze pagina een stuk sneller.
 
 | Machine | Wat het voor jou betekent |
 |---|---|
-| **login01** | De enige machine waarop je inlogt. Bestanden bewerken, pakketten installeren, git, werk indienen — maar niet rekenen: er is er één en iedereen deelt hem. Rocky Linux 9, met één NVIDIA A10 (23 GB) om op te testen |
-| **node001 … node008** | Waar je rekenwerk draait. Je logt er niet rechtstreeks op in; je dient werk in en Slurm wijst een node toe zodra er plaats is. Rocky Linux 9, met twee NVIDIA L40-GPU's (46 GB) per node |
+| **login01** | De enige machine waarop je inlogt. Bestanden bewerken, pakketten installeren, git, werk indienen — maar niet rekenen: er is er één en iedereen deelt hem. Rocky Linux 9, met één NVIDIA A10 (23 GB) om op te testen. Hier draaien ook Docker en de Ray head |
+| **node001 … node008** | Waar je rekenwerk draait. Je logt er niet rechtstreeks op in; je dient werk in en Slurm wijst een node toe zodra er plaats is. Rocky Linux 9, met twee NVIDIA L40-GPU's (46 GB) per node, en elk een Ray worker |
 | **controller1** | De machinekamer: de planner, het gebruikersbeheer, de webportal en de gedeelde schijf. Je hebt er geen login, en hebt die ook niet nodig |
 | **/trinity/home/…** | Jouw map, op de loginnode én op elke node dezelfde. Wat je hier opslaat ziet je job ook — kopiëren hoeft niet. Alleen `/trinity` is gedeeld: `/tmp`, `/etc` en de rest van het systeem heeft elke machine voor zich |
 

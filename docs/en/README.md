@@ -13,8 +13,8 @@ picture, the rest of this page reads a good deal faster.
 
 | Machine | What it means for you |
 |---|---|
-| **login01** | The only machine you log in to. Editing files, installing packages, git, submitting work — but no computing: there is one of it and everyone shares it. Rocky Linux 9, with one NVIDIA A10 (23 GB) to test on |
-| **node001 … node008** | Where your computing runs. You do not log in to them directly; you submit work and Slurm assigns a node as soon as there is room. Rocky Linux 9, with two NVIDIA L40 GPUs (46 GB) per node |
+| **login01** | The only machine you log in to. Editing files, installing packages, git, submitting work — but no computing: there is one of it and everyone shares it. Rocky Linux 9, with one NVIDIA A10 (23 GB) to test on. Docker and the Ray head run here too |
+| **node001 … node008** | Where your computing runs. You do not log in to them directly; you submit work and Slurm assigns a node as soon as there is room. Rocky Linux 9, with two NVIDIA L40 GPUs (46 GB) per node, and a Ray worker on each |
 | **controller1** | The engine room: the scheduler, user management, the web portal and the shared storage. You have no login there, and do not need one |
 | **/trinity/home/…** | Your directory, the same one on the login node and on every compute node. What you save here your job sees too — no copying needed. Only `/trinity` is shared: `/tmp`, `/etc` and the rest of the system each machine keeps to itself |
 

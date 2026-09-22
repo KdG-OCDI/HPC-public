@@ -28,7 +28,7 @@
   <text x="54" y="215" font-family="IBM Plex Mono, Consolas, monospace" font-size="11" fill="#131C29">Rocky Linux 9</text>
   <rect x="156" y="200" width="158" height="21" rx="5" fill="#FFFFFF" stroke="#CFD7E1"/>
   <text x="166" y="215" font-family="IBM Plex Mono, Consolas, monospace" font-size="11" fill="#131C29">1 × NVIDIA A10 · 23 GB</text>
-  <rect x="326" y="200" width="62" height="21" rx="5" fill="#FFFFFF" stroke="#CFD7E1"/><text x="336" y="215" font-family="IBM Plex Mono, Consolas, monospace" font-size="11" fill="#131C29">Docker</text><text x="400" y="215" font-size="11.5" fill="#4A5769">runs here, not on the nodes</text>
+  <rect x="326" y="200" width="62" height="21" rx="5" fill="#FFFFFF" stroke="#CFD7E1"/><text x="336" y="215" font-family="IBM Plex Mono, Consolas, monospace" font-size="11" fill="#131C29">Docker</text><rect x="396" y="200" width="74" height="21" rx="5" fill="#FFFFFF" stroke="#CFD7E1"/><text x="406" y="215" font-family="IBM Plex Mono, Consolas, monospace" font-size="11" fill="#131C29">Ray head</text><text x="482" y="215" font-size="11.5" fill="#4A5769">on this machine only</text>
 
   <line x1="60" y1="236" x2="60" y2="270" stroke="#CFD7E1"/>
   <rect x="72" y="244" width="94" height="18" rx="5" fill="#FFFFFF" stroke="#CFD7E1"/>
@@ -58,7 +58,7 @@
   <text x="54" y="427" font-family="IBM Plex Mono, Consolas, monospace" font-size="11" fill="#131C29">Rocky Linux 9</text>
   <rect x="156" y="412" width="168" height="21" rx="5" fill="#FFFFFF" stroke="#CFD7E1"/>
   <text x="166" y="427" font-family="IBM Plex Mono, Consolas, monospace" font-size="11" fill="#131C29">2 × NVIDIA L40 · 46 GB</text>
-  <text x="336" y="427" font-size="11.5" fill="#4A5769">per node — sixteen in total, requested with your job</text>
+  <rect x="336" y="412" width="82" height="21" rx="5" fill="#FFFFFF" stroke="#CFD7E1"/><text x="346" y="427" font-family="IBM Plex Mono, Consolas, monospace" font-size="11" fill="#131C29">Ray worker</text><text x="430" y="427" font-size="11.5" fill="#4A5769">per node — sixteen in total</text>
 
   <line x1="44" y1="447" x2="664" y2="447" stroke="#CFD7E1" stroke-dasharray="3 3"/>
   <text x="44" y="465" font-family="IBM Plex Mono, Consolas, monospace" font-size="10.5" letter-spacing="1.3" fill="#4A5769">WHICH QUEUE YOU JOIN</text>
