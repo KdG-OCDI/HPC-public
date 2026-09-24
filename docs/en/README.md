@@ -134,18 +134,12 @@ chapter.
 
 Turn the VPN on (or use the KdG network) and go to:
 
-**[https://datalab.kdg.be:8080](https://datalab.kdg.be:8080)**
+**[https://datalab.kdg.be](https://datalab.kdg.be)**
 
 Click **Azure SSO Login** and sign in with your school account. Nothing else:
 no tunnel, no browser extension.
 
 ![Sign-in page](../../images/login_page.png)
-
-> **Your browser will warn about the certificate.** Click *Advanced* and
-> continue anyway. The server's certificate is still issued for an older name;
-> a new one has been requested. Your connection is encrypted either way — your
-> browser simply cannot confirm who is on the other end, and inside the KdG
-> network that is an acceptable risk.
 
 You are in. What you can do there is described in [A Jupyter notebook through
 the portal](jupyter.md).
@@ -221,7 +215,7 @@ server did with it.
 | `Could not resolve hostname kdg-compute` | You have not run step 2 — use the full address |
 | The test in step 7 fails | Normal if you set a passphrase on your key; test with `ssh kdg-compute` |
 | Your job sits at `PD` in `squeue` | The cluster is busy, or you asked for more than exists. `sinfo` shows what is free |
-| Portal unreachable | The VPN is off. The address is `https://datalab.kdg.be:8080`, with the `https` and the port |
+| Portal unreachable | The VPN is off. The address is `https://datalab.kdg.be` |
 
 Still stuck? Open an
 [issue](https://github.com/KdG-OCDI/hpc-public/issues) or mail

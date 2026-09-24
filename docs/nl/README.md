@@ -135,18 +135,12 @@ editor, dan kun je dit hoofdstuk overslaan.
 
 Zet de VPN aan (of gebruik het KdG-netwerk) en ga naar:
 
-**[https://datalab.kdg.be:8080](https://datalab.kdg.be:8080)**
+**[https://datalab.kdg.be](https://datalab.kdg.be)**
 
 Klik op **Azure SSO Login** en meld je aan met je schoolaccount. Verder niets:
 geen tunnel, geen browser-extensie.
 
 ![Aanmeldpagina](../../images/login_page.png)
-
-> **Je browser waarschuwt over het certificaat.** Klik op *Geavanceerd* en ga
-> toch verder. Het certificaat van de server staat nog op een oude naam; er is
-> een nieuw aangevraagd. Je verbinding is wel degelijk versleuteld — alleen kan
-> je browser niet bevestigen wie er aan de andere kant zit, en binnen het
-> KdG-netwerk is dat een aanvaardbaar risico.
 
 Je bent nu binnen. Wat je er kunt doen staat in
 [Een Jupyter-notebook via de portal](jupyter.md).
@@ -223,7 +217,7 @@ en wat de server ermee deed.
 | `Could not resolve hostname kdg-compute` | Je hebt stap 2 niet gedraaid — gebruik het volledige adres |
 | De test in stap 7 faalt | Normaal als je een passphrase op je sleutel zette; test met `ssh kdg-compute` |
 | Je job blijft in `PD` staan in `squeue` | De cluster is bezet, of je vraagt meer dan er is. `sinfo` toont wat vrij is |
-| Portal onbereikbaar | VPN staat niet aan. Het adres is `https://datalab.kdg.be:8080`, met de `https` en de poort erbij |
+| Portal onbereikbaar | VPN staat niet aan. Het adres is `https://datalab.kdg.be` |
 
 Lukt het niet? Open een
 [issue](https://github.com/KdG-OCDI/hpc-public/issues) of stuur een mail naar
