@@ -8,8 +8,8 @@ Read on if you want to understand what it does, if you prefer to do it
 yourself, if you work from WSL or manage several keys, or if something went
 wrong and you want to check each step separately.
 
-Everything here assumes you are on the KdG network or connected to the
-**GlobalProtect VPN**.
+Everything here assumes you are connected to the **GlobalProtect VPN**, which
+is needed on campus too.
 
 ---
 

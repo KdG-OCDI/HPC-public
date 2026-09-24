@@ -67,7 +67,7 @@ else
 fi
 [ "$reachable" -eq 1 ] || die "$CLUSTER_HOST is niet bereikbaar op poort 22.
 
-Verbind eerst met de KdG GlobalProtect VPN (of gebruik het KdG-netwerk)
+Verbind eerst met de KdG GlobalProtect VPN (ook op de campus nodig)
 en start dit script daarna opnieuw."
 ok "$CLUSTER_HOST bereikbaar"
 

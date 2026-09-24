@@ -28,19 +28,17 @@ Hieronder zet je in ongeveer twee minuten je toegang op.
 | **Loginnode (SSH)** | `compute.kdg.be` |
 | **Je map op de cluster** | `/trinity/home/jouw_accountnaam`, zichtbaar op alle nodes |
 | **Planner** | Slurm — `sbatch`, `srun`, `squeue` |
-| **Webportal** | Open OnDemand, via een tunnel (zie [stap 5](#5-toegang-tot-de-webportal)) |
+| **Webportal** | Open OnDemand op `https://datalab.kdg.be` (zie [stap 5](#5-de-webportal)) |
 
 ---
 
 ## 1. Verbind met het netwerk
 
-De cluster is alleen bereikbaar vanaf het KdG-netwerk.
+De cluster is alleen bereikbaar via de **GlobalProtect VPN** —
+[instructies](https://studentkdg.sharepoint.com/sites/intranet-nl-ict/SitePages/GlobalProtect-(VPN).aspx)
 
-- **Op de campus:** verbind met het wifi-netwerk `KdG`.
-- **Van thuis:** zet de **GlobalProtect VPN** aan —
-  [instructies](https://studentkdg.sharepoint.com/sites/intranet-nl-ict/SitePages/GlobalProtect-(VPN).aspx)
-
-Zonder een van beide werkt niets van wat hieronder staat.
+Zet hem **altijd** aan, ook op de campus. Zonder VPN werkt niets van wat
+hieronder staat.
 
 ---
 
@@ -133,20 +131,14 @@ Alleen nodig als je de portal wil gebruiken, bijvoorbeeld voor een
 [Jupyter-notebook in je browser](jupyter.md). Werk je liever in je eigen
 editor, dan kun je dit hoofdstuk overslaan.
 
-Zet de VPN aan (of gebruik het KdG-netwerk) en ga naar:
+Zet de VPN aan en ga naar:
 
-**[https://datalab.kdg.be:8080](https://datalab.kdg.be:8080)**
+**[https://datalab.kdg.be](https://datalab.kdg.be)**
 
 Klik op **Azure SSO Login** en meld je aan met je schoolaccount. Verder niets:
 geen tunnel, geen browser-extensie.
 
 ![Aanmeldpagina](../../images/login_page.png)
-
-> **Je browser waarschuwt over het certificaat.** Klik op *Geavanceerd* en ga
-> toch verder. Het certificaat van de server staat nog op een oude naam; er is
-> een nieuw aangevraagd. Je verbinding is wel degelijk versleuteld — alleen kan
-> je browser niet bevestigen wie er aan de andere kant zit, en binnen het
-> KdG-netwerk is dat een aanvaardbaar risico.
 
 Je bent nu binnen. Wat je er kunt doen staat in
 [Een Jupyter-notebook via de portal](jupyter.md).
@@ -223,7 +215,7 @@ en wat de server ermee deed.
 | `Could not resolve hostname kdg-compute` | Je hebt stap 2 niet gedraaid — gebruik het volledige adres |
 | De test in stap 7 faalt | Normaal als je een passphrase op je sleutel zette; test met `ssh kdg-compute` |
 | Je job blijft in `PD` staan in `squeue` | De cluster is bezet, of je vraagt meer dan er is. `sinfo` toont wat vrij is |
-| Portal onbereikbaar | VPN staat niet aan. Het adres is `https://datalab.kdg.be:8080`, met de `https` en de poort erbij |
+| Portal onbereikbaar | VPN staat niet aan. Het adres is `https://datalab.kdg.be` |
 
 Lukt het niet? Open een
 [issue](https://github.com/KdG-OCDI/hpc-public/issues) of stuur een mail naar
