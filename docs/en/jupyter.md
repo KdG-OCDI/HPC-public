@@ -6,8 +6,8 @@ The simplest way in: a notebook in your browser, with no terminal knowledge
 required.
 
 **You need first:** a working account
-([step 2](README.md#2-run-one-command)) and an open tunnel to the portal
-([step 5](README.md#5-reaching-the-web-portal)).
+([step 2](README.md#2-run-one-command)) and the VPN on, so you can reach the
+portal ([step 5](README.md#5-the-web-portal)).
 
 ---
 

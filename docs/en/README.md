@@ -28,19 +28,16 @@ up your access in about two minutes.
 | **Login node (SSH)** | `compute.kdg.be` |
 | **Your directory** | `/trinity/home/your_username`, visible on every node |
 | **Scheduler** | Slurm — `sbatch`, `srun`, `squeue` |
-| **Web portal** | Open OnDemand, through a tunnel (see [step 5](#5-reaching-the-web-portal)) |
+| **Web portal** | Open OnDemand at `https://datalab.kdg.be` (see [step 5](#5-the-web-portal)) |
 
 ---
 
 ## 1. Connect to the network
 
-The cluster is only reachable from the KdG network.
+The cluster is only reachable over the **GlobalProtect VPN** —
+[instructions (NL)](https://studentkdg.sharepoint.com/sites/intranet-nl-ict/SitePages/GlobalProtect-(VPN).aspx)
 
-- **On campus:** connect to the `KdG` WiFi network.
-- **From home:** turn on the **GlobalProtect VPN** —
-  [instructions (NL)](https://studentkdg.sharepoint.com/sites/intranet-nl-ict/SitePages/GlobalProtect-(VPN).aspx)
-
-Nothing below works without one of the two.
+Turn it on **every time**, on campus too. Nothing below works without it.
 
 ---
 
@@ -132,7 +129,7 @@ Only needed if you want to use the portal, for instance for a [Jupyter notebook
 in your browser](jupyter.md). If you prefer your own editor, you can skip this
 chapter.
 
-Turn the VPN on (or use the KdG network) and go to:
+Turn the VPN on and go to:
 
 **[https://datalab.kdg.be](https://datalab.kdg.be)**
 

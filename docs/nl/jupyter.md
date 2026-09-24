@@ -6,7 +6,7 @@ De eenvoudigste manier om te beginnen: een notebook in je browser, zonder dat
 je iets van de terminal hoeft te weten.
 
 **Vooraf nodig:** een werkend account ([stap 2](README.md#2-draai-één-commando))
-en een open tunnel naar de portal ([stap 5](README.md#5-toegang-tot-de-webportal)).
+en de VPN aan, zodat je bij de portal kunt ([stap 5](README.md#5-de-webportal)).
 
 ---
 

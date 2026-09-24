@@ -43,7 +43,7 @@ Includes the web portal and troubleshooting.
 |---|---|
 | **Loginnode** · Login node | `compute.kdg.be` |
 | **Planner** · Scheduler | Slurm — `sbatch`, `srun`, `squeue` |
-| **Nodig** · Required | KdG-netwerk of GlobalProtect VPN |
+| **Nodig** · Required | GlobalProtect VPN, ook op de campus · also on campus |
 
 Je hebt een accountnaam en een eenmalig wachtwoord nodig van het HPC-team. Heb
 je die nog niet, neem dan contact op.
